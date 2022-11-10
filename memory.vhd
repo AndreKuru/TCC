@@ -6,10 +6,10 @@ use ieee.math_real.all;
 entity memory is
   generic (addressSize, dataElementSize : natural)
   port(
-    clk, write_in : in  std_logic; 
-    address         : in  std_logic_vector(addressSize-1 downto 0);     
-    data_in         : in  std_logic_vector(dataElementSize-1 downto 0);
-    data_out        : out std_logic_vector(dataElementSize-1 downto 0)
+    clk, write_in                         : in  std_logic; 
+    address0, address1, address2          : in  std_logic_vector(addressSize-1 downto 0);     
+    data_in0, data_in1, data_in2          : in  std_logic_vector(dataElementSize-1 downto 0);
+    data_out0, data_out1, data_out2       : out std_logic_vector(dataElementSize-1 downto 0)
   ); 
 end memory;
 
@@ -34,11 +34,15 @@ begin
   begin
     if(rising_edge(clock)) then
       if(write_in='1') then 
-        ram_data(to_integer(unsigned(address))) <= data_in;
+        ram_data(to_integer(unsigned(address0))) <= data_in0;
+        ram_data(to_integer(unsigned(address1))) <= data_in1;
+        ram_data(to_integer(unsigned(address2))) <= data_in2;
       end if;
     end if;
   end process;
 
- data_out <= ram_data(to_integer(unsigned(address)));
+ data_out0 <= ram_data(to_integer(unsigned(address0)));
+ data_out1 <= ram_data(to_integer(unsigned(address1)));
+ data_out2 <= ram_data(to_integer(unsigned(address2)));
 
 end arch;

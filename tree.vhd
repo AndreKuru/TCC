@@ -29,10 +29,10 @@ end component;
 component memory is
   generic (addressSize, dataElementSize : natural)
   port(
-    clock, write_in : in  std_logic; 
-    address         : in  std_logic_vector(addressSize-1 downto 0);     
-    data_in         : in  std_logic_vector(dataElementSize-1 downto 0);
-    data_out        : out std_logic_vector(dataElementSize-1 downto 0)
+    clock, write_in                       : in  std_logic; 
+    address0, address1, address2          : in  std_logic_vector(addressSize-1 downto 0);     
+    data_in0, data_in1, data_in2          : in  std_logic_vector(dataElementSize-1 downto 0);
+    data_out0, data_out1, data_out2       : out std_logic_vector(dataElementSize-1 downto 0)
   ); 
 end component;
  
@@ -66,9 +66,13 @@ begin
     port map(
       clk                => clk,
       write_in           => write_in,
-      sAdress0           => address,
-      data_in            => data_in,
-      sCostantFromMemory => data_out
+      sAdress0           => address0,
+      sAdress1           => address1,
+      sAdress2           => address2,
+      data_in0            => data_in0,
+      data_in1            => data_in1,
+      data_in2            => data_in2,
+      sCostantFromMemory => data_out0
     );
 
 end arch;

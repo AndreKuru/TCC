@@ -19,13 +19,6 @@ component subtractor is
       y     : out std_logic_vector(n-1 downto 0));
 end component;
 
-component mux2to1 is
-  generic(n:natural);
-  port(a, b     : in  std_logic_vector(n-1 downto 0);
-      selector  : in  std_logic;
-      y         : out std_logic_vector(n-1 downto 0));
-end component;
- 
 component isZero is
   generic(n:natural);
   port(x  : in  std_logic_vector(n-1 downto 0);
@@ -53,13 +46,6 @@ begin
         isEqual           => y
       );
 
-    Mux : mux2to1
-      generic map(n => n)
-      port map(
-        isLesser              => a,
-        (isLesser or isEqual) => b,
-        isLesserOrEqual       => selector,
-        isNextLeft            => y
-      );
+      isNextLeft <= isLesser or isEqual;
 
 end arch;
