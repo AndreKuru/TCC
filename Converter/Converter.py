@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from numpy import double
+from pathlib import Path
 
 VALID_BIT = 1
 INVALID_BIT = 0
@@ -20,7 +21,7 @@ class Node:
 
 
 # Breadth first search in input tree
-def sort_input_tree(tree: Input_tree):
+def sort_input_tree(tree: Input_tree) -> tuple[dict, int]:
     queue = [0]  # queue of nodes by input index
     queued = [0] # by nodes queueds by input index
 
@@ -56,7 +57,7 @@ def sort_input_tree(tree: Input_tree):
     
     return (new_indexes, max_index)
 
-def convert(tree: Input_tree):
+def convert(tree: Input_tree) -> list[Node]:
     new_indexes, max_index = sort_input_tree(tree)
 
     new_tree = list()
@@ -80,38 +81,45 @@ def convert(tree: Input_tree):
         
     return new_tree
 
-class Output_tree:
-    nodes: list("Node") = field(default_factory=list)
-    queue: dict(int) = field(default_factory=dict)
-    position:   int
-
-    def set_root(self, tree: Input_tree):
-        leaf = check_leaf(tree, 0)
-        node = Node(1, leaf, tree.treshhold[0], tree.feature[0])
-        self.nodes = [node]
-
-    def fill_queue(tree: Input_tree):
-        queue = dict()
-        for position in range (0, len(tree.feature)):
-            if tree.children_left != -1:
-                queue.add(2*position + 1, tree.children_left)
-
-            if tree.children_right != -1:
-                queue.add(2*position + 2, tree.children_right)
-        
-
-        children_right = tree.children_right
-        if children_left != -1:
-            queue.add(children_left)
-        ...
-        queue.add(children_right)
+def write_tree(output_tree: list[Node], filepath: Path) -> None:
+    with filepath.open("w") as file:
+        for node in output_tree:
+            line = f"{node.valid_bit}{node.leaf}{node.feature:064b}{node.treshhold:064b}"
+            file.write(line)
 
 
-
-def check_leaf(tree: Input_tree, index: int):
-    if (tree.children_left[index] == -1 and
-        tree.children_right[index == -1]):
-        return True
-
-def get_children_left(tree: Input_tree, index: int):
-    return tree.children_left[index]
+#class Output_tree:
+#    nodes: list("Node") = field(default_factory=list)
+#    queue: dict(int) = field(default_factory=dict)
+#    position:   int
+#
+#    def set_root(self, tree: Input_tree):
+#        leaf = check_leaf(tree, 0)
+#        node = Node(1, leaf, tree.treshhold[0], tree.feature[0])
+#        self.nodes = [node]
+#
+#    def fill_queue(tree: Input_tree):
+#        queue = dict()
+#        for position in range (0, len(tree.feature)):
+#            if tree.children_left != -1:
+#                queue.add(2*position + 1, tree.children_left)
+#
+#            if tree.children_right != -1:
+#                queue.add(2*position + 2, tree.children_right)
+#        
+#
+#        children_right = tree.children_right
+#        if children_left != -1:
+#            queue.add(children_left)
+#        ...
+#        queue.add(children_right)
+#
+#
+#
+#def check_leaf(tree: Input_tree, index: int):
+#    if (tree.children_left[index] == -1 and
+#        tree.children_right[index == -1]):
+#        return True
+#
+#def get_children_left(tree: Input_tree, index: int):
+#    return tree.children_left[index]
