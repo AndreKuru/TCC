@@ -3,9 +3,9 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 entity tree is
-    generic(addressSize     : 5,
+    generic(addressSize     : 5,    
             dataElementSize : 8);
-    port(isLesserOrEqual            : in  std_logic;
+    port(--isLesserOrEqual            : in  std_logic;
         feature, constantFromMemory : in  std_logic_vector(n-1 downto 0);
         isNextLeft                  : out std_logic);
         --                          : out std_logic_vector(n-1 downto 0));
@@ -19,9 +19,9 @@ component address_calculator is
       adress0, adress1, adress2 : out std_logic_vector(n-1 downto 0));
 end component;
 
-component tree_comparator is
+component kernel is
     generic(n : natural);
-    port(isLesserOrEqual            : in  std_logic;
+    port(--isLesserOrEqual            : in  std_logic;
         feature, constantFromMemory : in  std_logic_vector(n-1 downto 0);
         isNextLeft                  : out std_logic);
 end component;
@@ -51,7 +51,7 @@ begin
       sAdress2      => adress2
     );
   
-  TreeComparator : tree_comparator
+  Kernel : kernel
     generic map(dataElementSize => n)
     port map(
       sIsLesserOrEqual    => isLesserOrEqual,

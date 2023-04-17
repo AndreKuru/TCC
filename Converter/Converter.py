@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 from numpy import double
 
+VALID_BIT = 1
+INVALID_BIT = 0
+
 @dataclass
 class Input_tree:
     children_left : list(int)
@@ -8,11 +11,74 @@ class Input_tree:
     feature : list(int)
     treshhold : list(double)
 
+@dataclass
 class Node:
     valid_bit:  list(bool)
     leaf:       list(bool)
     treshhold:  list(double)
     feature:    list(int)
+
+
+# Breadth first search in input tree
+def sort_input_tree(tree: Input_tree):
+    queue = [0]  # queue of nodes by input index
+    queued = [0] # by nodes queueds by input index
+
+    new_indexes = {0: 0} # node index in the output tree
+    max_index = 0
+
+    while len(queue) > 0:
+        input_node = queue.pop(0) # input node is a index
+
+        children_left = tree.children_left[input_node]
+
+        if children_left != -1:
+            if children_left in queued:
+                raise("node", children_left, "was queued more than once.")
+            new_index = new_indexes[input_node] * 2 + 1
+            new_indexes[new_index] = children_left
+            max_index = new_index
+
+            queue.append(children_left)
+            queued.append(children_left)
+        
+        children_right = tree.children_right[input_node]
+
+        if children_right != -1:
+            if children_right in queued:
+                raise("node", children_right, "was queued more than once.")
+            new_index = new_indexes[input_node] * 2 + 2
+            new_indexes[new_index] = children_right
+            max_index = new_index
+
+            queue.append(children_right)
+            queued.append(children_right)
+    
+    return (new_indexes, max_index)
+
+def convert(tree: Input_tree):
+    new_indexes, max_index = sort_input_tree(tree)
+
+    new_tree = list()
+
+    for new_index in range(2**max_index.bit_length()):
+
+        if new_index in new_indexes:
+            input_index = new_indexes[new_index]
+
+            if tree.children_left[input_index] == -1 and tree.children_right[input_index] == -1:
+                leaf = 1
+            else:
+                leaf = 0
+
+            new_node = Node(VALID_BIT, leaf, tree.treshhold[input_index], tree.feature[input_index])
+            new_tree.append(new_node)
+        
+        else:
+            new_node = Node(INVALID_BIT, 0, 0, 0)
+            new_tree.append(new_node)
+        
+    return new_tree
 
 class Output_tree:
     nodes: list("Node") = field(default_factory=list)
