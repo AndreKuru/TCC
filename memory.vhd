@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 
 entity memory is
-  generic (addressSize, dataElementSize : natural)
+  generic (addressSize, dataElementSize : natural);
   port(
     clk, write_in                         : in  std_logic; 
     address0, address1, address2          : in  std_logic_vector(addressSize-1 downto 0);     

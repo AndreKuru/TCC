@@ -3,8 +3,8 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 entity tree is
-    generic(addressSize     : 5,    
-            dataElementSize : 8);
+    generic(addressSize     :natural := 5;
+            dataElementSize :natural := 8);
     port(--isLesserOrEqual            : in  std_logic;
         feature, constantFromMemory : in  std_logic_vector(n-1 downto 0);
         isNextLeft                  : out std_logic);
@@ -27,7 +27,7 @@ component kernel is
 end component;
 
 component memory is
-  generic (addressSize, dataElementSize : natural)
+  generic (addressSize, dataElementSize : natural);
   port(
     clock, write_in                       : in  std_logic; 
     address0, address1, address2          : in  std_logic_vector(addressSize-1 downto 0);     
@@ -61,8 +61,8 @@ begin
     );
 
   Memory : memory
-    generic(addressSize     => addressSize,
-            dataElementSize => dataElementSize)
+    generic map(addressSize     => addressSize,
+                dataElementSize => dataElementSize)
     port map(
       clk                => clk,
       write_in           => write_in,

@@ -14,7 +14,7 @@ architecture arch of address_calculator is
 
 component registrator is
   generic(n: natural);
-  port(clk, load  : in  std_logic
+  port(clk, load  : in  std_logic;
       d           : in  std_logic_vector(n-1 downto 0);
       q           : out std_logic_vector(n-1 downto 0));
   end component;
@@ -39,7 +39,7 @@ component shiftBy1 is
       y  : out std_logic_vector(n-1 downto 0));
 end component;
 
-signal indexOutput, shiffterOutput, adder1Output, adder2Output, muxOutput : std_logic_vector(n-1 downto 0)
+signal indexOutput, shiffterOutput, adder1Output, adder2Output, muxOutput : std_logic_vector(n-1 downto 0);
 
 begin
     Index : registrator
@@ -61,24 +61,24 @@ begin
     Adder1 : adder
       generic map(n => n)
       port map(
-        1             => a,
-        shiffterOuput => b,
-        adder1Output  => y
+        to_signed(1, a'lenght)  => a,
+        shiffterOuput           => b,
+        adder1Output            => y
       );
 
     Adder2 : adder
       generic map(n => n)
       port map(
-        shiffterOuput   => a,
-        2               => b,
-        adder2Output    => y
+        shiffterOuput           => a,
+        to_signed(2, b'lenght)  => b,
+        adder2Output            => y
       );
 
     MuxFromAdders : mux2to1
       generic map(n => n)
       port map(
-        adder1Output  => a
-        adder2Output  => b
+        adder1Output  => a,
+        adder2Output  => b,
         isNextLeft    => selector,
         muxOutput     => y
       );
