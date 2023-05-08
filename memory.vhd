@@ -4,13 +4,22 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 
 entity memory is
-  generic (addressSize, dataElementSize : natural);
-  port(
-    clk, write_in                         : in  std_logic; 
-    address0, address1, address2          : in  std_logic_vector(addressSize-1 downto 0);     
-    data_in0, data_in1, data_in2          : in  std_logic_vector(dataElementSize-1 downto 0);
-    data_out0, data_out1, data_out2       : out std_logic_vector(dataElementSize-1 downto 0)
-  ); 
+    generic (node_address_size  :natural;
+            node_size           :natural;
+            nodes_in_parallel   :natural);
+    port(
+        clk, write_in : in  std_logic; 
+        node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);
+        node_data_in    : in  std_logic_vector(nodes_in_parallel * node_size - 1 downto 0); 
+        node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)
+    ); 
+  -- generic (addressSize, dataElementSize : natural);
+  -- port(
+  --   clk, write_in                         : in  std_logic; 
+  --   address0, address1, address2          : in  std_logic_vector(addressSize-1 downto 0);     
+  --   data_in0, data_in1, data_in2          : in  std_logic_vector(dataElementSize-1 downto 0);
+  --   data_out0, data_out1, data_out2       : out std_logic_vector(dataElementSize-1 downto 0)
+  -- ); 
 end memory;
 
 architecture arch of memory is
