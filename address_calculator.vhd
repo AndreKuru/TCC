@@ -3,11 +3,18 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 entity address_calculator is
-  generic(n : natural);
-  port(clk, reset, isNextLeft   : in  std_logic;
-      --                        : in  std_logic_vector(n-1 downto 0);
-      --                        : out std_logic;
-      adress0, adress1, adress2 : out std_logic_vector(n-1 downto 0));
+--   generic(n : natural);
+--   port(clk, reset, isNextLeft   : in  std_logic;
+--       --                        : in  std_logic_vector(n-1 downto 0);
+--       --                        : out std_logic;
+--       adress0, adress1, adress2 : out std_logic_vector(n-1 downto 0));
+-- end address_calculator;
+    generic(levels_in_parallel  :natural = 0;
+            node_address_size   :natural); -- levels_in_memory
+    port(
+        clk, reset  : in  std_logic;
+        next_nodes  : in  std_logic_vector(levels_in_parallel dowto 0);
+        node_addresses : out std_logic_vector(node_address_size downto 0));
 end address_calculator;
 
 architecture arch of address_calculator is
@@ -19,72 +26,33 @@ component registrator is
       q           : out std_logic_vector(n-1 downto 0));
   end component;
 
-component mux2to1 is
-  generic(n:natural);
-  port(a, b     : in  std_logic_vector(n-1 downto 0);
-      selector  : in  std_logic;
-      y         : out std_logic_vector(n-1 downto 0));
-end component;
-	
-component adder is
-generic(n:natural);
-port(a, b : in  std_logic_vector(n-1 downto 0);
-	  cout  : out std_logic;
-    y     : out std_logic_vector(n-1 downto 0));
+component single_address_calculator is
+    generic(node_address_size   :natural); -- levels_in_memory
+    port(
+        clk, next_node_left : in  std_logic;
+        node_address_in     : in  std_logic_vector(node_address_size downto 0);
+        node_address_out    : out std_logic_vector(node_address_size downto 0));
 end component;
 
-component shiftBy1 is
-  generic(n:natural);
-  port(x : in  std_logic_vector(n-1 downto 0);
-      y  : out std_logic_vector(n-1 downto 0));
-end component;
-
-signal indexOutput, shiffterOutput, adder1Output, adder2Output, muxOutput : std_logic_vector(n-1 downto 0);
+signal index_output, shifter_output, single_address_calculator_output : std_logic_vector(n-1 downto 0);
 
 begin
     Index : registrator
-      generic map(n => n)
+      generic map(node_address_size => n)
       port map(
         clk         => clk,
         load        => load,
-        muxOutput   => d,
-        indexOutput => q
+        single_address_calculator_output   => d,
+        index_output => q
       );
 
-    Shiffter : shiftBy1
-      generic map(n => n)
+    Single_address_calculator : single_address_calculator
+      generic map(node_address_size => node_address_size)
       port map(
-        indexOutput     => x,
-        shiffterOutput  => y
+        clk                               => clk,
+        next_nodes(0)                     => next_node_left,
+        index_output                      => node_address_in,
+        single_address_calculator_output  => node_address_out
       );
-
-    Adder1 : adder
-      generic map(n => n)
-      port map(
-        to_signed(1, a'lenght)  => a,
-        shiffterOuput           => b,
-        adder1Output            => y
-      );
-
-    Adder2 : adder
-      generic map(n => n)
-      port map(
-        shiffterOuput           => a,
-        to_signed(2, b'lenght)  => b,
-        adder2Output            => y
-      );
-
-    MuxFromAdders : mux2to1
-      generic map(n => n)
-      port map(
-        adder1Output  => a,
-        adder2Output  => b,
-        isNextLeft    => selector,
-        muxOutput     => y
-      );
-
-      address0 <= indexOutput;
-      address1 <= adder1Output;
-      address2 <= adder2Output;
 
 end arch;

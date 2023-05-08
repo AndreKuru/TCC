@@ -54,7 +54,7 @@ component memory is
 end component;
  
 begin
-  AdressCalculator : address_calculator
+  AddressCalculator : address_calculator
     generic map()
     port map(
     );
