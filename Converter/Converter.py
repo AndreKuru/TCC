@@ -13,10 +13,10 @@ class Input_tree:
 
 @dataclass
 class Node:
-    valid_bit       : list[bool]
-    leaf            : list[bool]
-    threshold       : list[float]
-    feature         : list[int]
+    valid_bit       : bool
+    leaf            : bool
+    threshold       : float
+    feature         : int
 
 
 # Breadth first search in input tree
