@@ -24,9 +24,9 @@ converted_tree = convert(tree)
 
 i = 0
 for node in converted_tree:
-    i = i + 1
     print(i,end=' ')
     print(node)
+    i = i + 1
 
 plot_tree(classifier, fontsize=10)
 pyplot.show()

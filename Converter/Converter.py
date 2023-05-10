@@ -22,7 +22,7 @@ class Node:
 # Breadth first search in input tree
 def sort_input_tree(tree: Input_tree) -> tuple[dict, int]:
     queue = [0]  # queue of nodes by input index
-    queued = [0] # nodes queueds by input index
+    queued = {0} # nodes queueds by input index
 
     new_indexes = {0: 0} # node index in the output tree
     input_indexes = {0: 0} # node index in the input tree
@@ -42,7 +42,7 @@ def sort_input_tree(tree: Input_tree) -> tuple[dict, int]:
             max_index = new_index
 
             queue.append(children_left)
-            queued.append(children_left)
+            queued.add(children_left)
         
         children_right = tree.children_right[input_node]
 
@@ -55,12 +55,12 @@ def sort_input_tree(tree: Input_tree) -> tuple[dict, int]:
             max_index = new_index
 
             queue.append(children_right)
-            queued.append(children_right)
+            queued.add(children_right)
     
-    return input_indexes, max_index
+    return input_indexes, max_index, new_indexes
 
 def convert(tree: Input_tree) -> list[Node]:
-    input_indexes, max_index = sort_input_tree(tree)
+    input_indexes, max_index, new_indexes = sort_input_tree(tree)
 
     new_tree = list()
 
@@ -69,7 +69,7 @@ def convert(tree: Input_tree) -> list[Node]:
         if new_index in input_indexes:
             input_index = input_indexes[new_index]
 
-            if input_index in input_indexes and tree.children_left[input_index] == -1 and tree.children_right[input_index] == -1:
+            if input_index in new_indexes and tree.children_left[input_index] == -1 and tree.children_right[input_index] == -1:
                 leaf = 1
             else:
                 leaf = 0
