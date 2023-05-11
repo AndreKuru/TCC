@@ -1,6 +1,5 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
 
 entity single_address_calculator is
     generic(node_address_size   :natural); -- levels_in_memory
@@ -14,41 +13,45 @@ architecture arch of single_address_calculator is
 
 component shiftBy1 is
   generic(n:natural);
-  port(x : in  std_logic_vector(n-1 downto 0);
-      y  : out std_logic_vector(n-1 downto 0));
+  port(x : in  std_logic_vector(n - 1 downto 0);
+      y  : out std_logic_vector(n - 1 downto 0));
 end component;
 
 component adder is
 generic(n:natural);
-port(a, b : in  std_logic_vector(n-1 downto 0);
+port(a, b : in  std_logic_vector(n - 1 downto 0);
 	  cout  : out std_logic;
-    y     : out std_logic_vector(n-1 downto 0));
+    y     : out std_logic_vector(n - 1 downto 0));
 end component;
 
-signal shifter_output : std_logic_vector(n-1 downto 0);
+signal shifter_output, constant1, constant2 : std_logic_vector(node_address_size - 1 downto 0);
 
 begin
+
+    constant1 <= (0 => '1', others => '0');
+    constant1 <= (1 => '1', others => '0');
+
     Shiffter : shiftBy1
-      generic map(node_address_size => n)
+      generic map(n => node_address_size)
       port map(
-        node_address_in => x,
-        shifter_output  => y
+        x => node_address_in,
+        y => shifter_output 
       );
 
     Adder1 : adder
-      generic map(node_address_size => n)
+      generic map(n => node_address_size)
       port map(
-        to_unsigned(1, a'lenght)  => a,
-        shifter_output             => b,
-        adder1_output              => y
+        a => constant1,
+        b => shifter_output,
+        y => adder1_output
       );
 
     Adder2 : adder
-      generic map(node_address_size => n)
+      generic map(n => node_address_size)
       port map(
-        shifter_output             => a,
-        to_unsigned(2, b'lenght)  => b,
-        adder2_output              => y
+        a => shifter_output,
+        b => constant2,
+        y => adder2_output
       );
 
 end arch;

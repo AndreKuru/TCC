@@ -98,9 +98,9 @@ signal ram_data: ram_array :=(
 
 begin
 
-    process(clock)
+    process(clk)
     begin
-        if(rising_edge(clock)) then
+        if(rising_edge(clk)) then
         if(write_in='1') then 
             ram_data(to_integer(unsigned(address0))) <= data_in0;
             ram_data(to_integer(unsigned(address1))) <= data_in1;

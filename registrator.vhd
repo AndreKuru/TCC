@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+-- use ieee.std_logic_unsigned.all;
 
 entity registrator is
   generic(n: natural);
@@ -11,7 +11,7 @@ entity registrator is
 
 architecture arch of registrator is
 begin
-  process(clk, carga)
+  process(clk, load)
   begin
     if (rising_edge(clk) and load = '1') then
       q <= d;

@@ -5,7 +5,7 @@ use work.accelerator_pkg.all;
 entity accelerator is
     generic(threshold_size          :natural;                                                        -- n
             feature_address_size    :natural;                                                        -- m
-            class_amount            :natural;                                                        --  
+            class_size              :natural;                                                        --  
             levels_in_memory        :natural;                                                        --  
             levels_in_parallel      :natural;                                                        -- d
             prefetch                :natural        
@@ -16,7 +16,7 @@ entity accelerator is
     port(
         clk         : in  std_logic;
         features    : in  std_logic_vector(threshold_size * feature_address_size - 1 downto 0);
-        class       : out std_logic_vector(Bit_lenght(class_amount) downto 0)
+        class       : out std_logic_vector(Bit_lenght(class_size) downto 0)
     );
 end accelerator;
 
@@ -34,7 +34,8 @@ component kernel is
             nodes_in_parallel   :natural);
     port(
         feature, threshold          : in  std_logic_vector(threshold_size * nodes_in_parallel - 1 downto 0);
-        next_nodes                  : out std_logic_vector(levels_in_parallel - 1 downto 0));
+        next_nodes                  : out std_logic --_vector(nodes_in_parallel - 1 downto 0)
+        );
 end component;
 
 component address_calculator is
@@ -43,7 +44,7 @@ component address_calculator is
             node_address_size   :natural); -- levels_in_memory
     port(
         clk, reset  : in  std_logic;
-        next_nodes  : in  std_logic_vector(levels_in_parallel-1 downto 0);
+        next_nodes  : in  std_logic; --_vector(levels_in_parallel-1 downto 0);
         node_addresses : out std_logic_vector(node_address_size downto 0));
 end component;
 
@@ -52,26 +53,33 @@ component memory is
             node_size           :natural;
             nodes_in_parallel   :natural);
     port(
-        clk, write_in : in  std_logic; 
+        clk, write_in   : in  std_logic; 
         -- node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);
         -- node_data_in    : in  std_logic_vector(nodes_in_parallel * node_size - 1 downto 0); 
         -- node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)
-        address0, address1, address2          : in  std_logic_vector(node_address_size-1 downto 0);     
-        data_in0, data_in1, data_in2          : in  std_logic_vector(node_size-1 downto 0);
-        data_out0, data_out1, data_out2       : out std_logic_vector(node_size-1 downto 0)
+        address0        : in  std_logic_vector(node_address_size-1 downto 0);     --, address1, address2
+        data_in0        : in  std_logic_vector(node_size-1 downto 0);             --, data_in1, data_in2
+        data_out0       : out std_logic_vector(node_size-1 downto 0)              --, data_out1, data_out2
     ); 
 end component;
 
-component mux2to1 is --TODO: implement muxNto1
-    generic(n:natural);
-    port(a, b     : in  std_logic_vector(n-1 downto 0);
-        selector  : in  std_logic;
-        y         : out std_logic_vector(n-1 downto 0));
+component mux_n_to_1 is
+    generic(
+        element_amount_bit_length  : natural;
+        element_size               : natural
+        );
+    port(elements         : in  std_logic_vector(element_amount_bit_length * element_size - 1 downto 0);
+        selector          : in  std_logic_vector(element_amount_bit_length - 1 downto 0);
+        selected_element  : out std_logic_vector(element_size - 1 downto 0)
+        );
 end component;
 
-signal kernel_output         : std_logic_vector(levels_in_parallel - 1 downto 0);
-signal mux_ouput, threshold  : std_logic_vector(threshold_size - 1 downto 0);
-signal features_selector     : std_logic_vector(0 downto 0); -- 2 ** (levels_in_parallel -1)
+signal kernel_output            : std_logic; --_vector(levels_in_parallel - 1 downto 0);
+signal mux_output, threshold    : std_logic_vector(threshold_size - 1 downto 0);
+signal features_selector        : std_logic_vector(feature_address_size - 1 downto 0);
+signal address_to_fetch         : std_logic_vector(node_address_size-1 downto 0);
+signal node_from_memory         : std_logic_vector(node_size-1 downto 0);
+signal valid_bit, leaf          : std_logic;
  
 begin
     AddressCalculator0 : address_calculator
@@ -81,30 +89,32 @@ begin
             node_address_size => node_address_size
         )
         port map(
-            clk                 => clk,
-            reset               => reset,
-            kernel_output       => next_nodes,
-            address_to_fetch    => node_addresses
+            clk             => clk,
+            reset           => '0', -- TODO
+            next_nodes      => kernel_output,
+            node_addresses  => address_to_fetch
         );
 
-    Mux : mux2to1
-        generic map(threshold_size => n)
+    Mux : mux_n_to_1
+        generic map(
+        element_amount_bit_length  => feature_address_size,
+        element_size               => threshold_size
+        )
         port map(
-            features(2 * threshold_size - 1 downto threshold_size)  => a,
-            features(threshold_size - 1 downto 0)                   => b,
-            features_selector                                       => selector,
-            mux_output                                              => y
+            elements         => features,
+            selector         => features_selector,
+            selected_element => mux_output
         );
     
     Kernel0 : kernel
         generic map(
-            threshold_size        => threshold_size,
+            threshold_size      => threshold_size,
             nodes_in_parallel   => nodes_in_parallel
         )
         port map(
-            mux_output              => feature,
+            feature     => mux_output,
             threshold   => threshold,
-            kernel_output           => next_nodes
+            next_nodes  => kernel_output
         );
 
     Memory0 : memory
@@ -114,17 +124,17 @@ begin
             nodes_in_parallel   => nodes_in_parallel
         )
         port map(
-            clk                     => clk,
-            -- write_in             => write_in,
-            address_to_fetch        => address0,
-            -- node_data_in         => node_data_in,
-            node_from_memory        => data_out0
+            clk             => clk,
+            write_in        => '0', --TODO
+            address0        => address_to_fetch,
+            data_in0        => node_from_memory, --TODO
+            data_out0       => node_from_memory
         );
 
-    valid_bit <= node_from_memory(node_size - 1);
-    leaf <= node_from_memory(node_size - 2);
-    threshold <= node_from_memory(node_size - 3 downto node_size - threshold_size - 2);
-    features_selector <= node_from_memory(feature_address_size downto 0);
+    valid_bit           <= node_from_memory(node_size - 1);
+    leaf                <= node_from_memory(node_size - 2);
+    threshold           <= node_from_memory(node_size - 3 downto node_size - threshold_size - 2);
+    features_selector   <= node_from_memory(feature_address_size - 1 downto 0);
 
     class <= "1111";
 end arch;

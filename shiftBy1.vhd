@@ -1,6 +1,5 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 
 entity shiftBy1 is
   generic(n:natural);
@@ -10,5 +9,5 @@ end shiftBy1;
 
 architecture arch of shiftBy1 is
 begin
-  y <= shift_left(unsigned(x), 1);
+  y <= x(n - 2 downto 0) & '0';
 end arch;
