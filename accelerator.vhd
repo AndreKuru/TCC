@@ -43,9 +43,9 @@ component address_calculator is
             prefetch            :natural;
             node_address_size   :natural); -- levels_in_memory
     port(
-        clk, reset  : in  std_logic;
-        next_nodes  : in  std_logic; --_vector(levels_in_parallel-1 downto 0);
-        node_addresses : out std_logic_vector(node_address_size downto 0));
+        clk, reset      : in  std_logic;
+        next_nodes      : in  std_logic; --_vector(levels_in_parallel-1 downto 0);
+        node_addresses  : out std_logic_vector(node_address_size - 1 downto 0));
 end component;
 
 component memory is

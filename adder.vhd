@@ -5,7 +5,7 @@ use ieee.std_logic_1164.all;
 entity adder is
   generic(n :natural);
   port(a, b : in  std_logic_vector(n - 1 downto 0);
-      cin   : in  std_logic;
+      cin   : in  std_logic := '0';
       cout  : out std_logic;
       y     : out std_logic_vector(n - 1 downto 0)
       );
