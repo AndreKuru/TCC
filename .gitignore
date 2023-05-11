@@ -130,3 +130,9 @@ dmypy.json
 
 # Vscode
 .vscode/
+
+# ghdl
+*.cf
+
+# my_tree_memory_files
+*.ktree
