@@ -3,12 +3,12 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 entity address_calculator is
-    generic(levels_in_parallel  :natural := 0;
+    generic(levels_in_parallel  :natural := 1;
             prefetch            :natural := 0;
             node_address_size   :natural); -- levels_in_memory
     port(
         clk, reset  : in  std_logic;
-        next_nodes  : in  std_logic_vector(levels_in_parallel downto 0);
+        next_nodes  : in  std_logic_vector(levels_in_parallel - 1 downto 0);
         node_addresses : out std_logic_vector(node_address_size downto 0));
 end address_calculator;
 

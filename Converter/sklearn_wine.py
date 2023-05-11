@@ -17,7 +17,7 @@ tree = Input_tree(
     list(classifier.tree_.threshold)
 )
 
-converted_tree = convert(tree)
+converted_tree, max_feature_index = convert(tree)
 
 # for i in range(len(tree.children_left)):
 #     print(i, tree.children_left[i], tree.children_right[i], tree.feature[i], tree.feature[i])
@@ -32,4 +32,6 @@ plot_tree(classifier, fontsize=10)
 pyplot.show()
 
 
-# export(converted_tree)
+print(max_feature_index)
+print(int(max_feature_index).bit_length())
+export(converted_tree, feature_lenght=pow(2, int(max_feature_index).bit_length()))

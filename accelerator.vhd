@@ -1,48 +1,49 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use work.accelerator_pkg.all;
 
 entity accelerator is
-    generic(feature_size        :natural := 64;                                                     -- n
-            features_amount     :natural := 2;                                                     -- m
-            class_amount        :natural := 10;                                                     --  
-            levels_in_memory    :natural := 12;                                                     --  
-            levels_in_parallel  :natural := 0;                                                      -- d
-            prefetch            :natural := 0
+    generic(threshold_size          :natural;                                                        -- n
+            feature_address_size    :natural;                                                        -- m
+            class_amount            :natural;                                                        --  
+            levels_in_memory        :natural;                                                        --  
+            levels_in_parallel      :natural;                                                        -- d
+            prefetch                :natural        
     );
-            -- node_size        = feature_size + log2(features_amount) + leaf_bit + valid_bit       -- q
-            -- memory_size = node_size * 2 ** levels_in_memory                                      -- t
+            -- node_size        = threshold_size + log2(feature_address_size) + leaf_bit + valid_bit -- q
+            -- memory_size = node_size * 2 ** levels_in_memory                                       -- t
             -- nodes_in_parallel = 2 ** levels_in_parallel                                           -- p
     port(
         clk         : in  std_logic;
-        features    : in  std_logic_vector(feature_size * features_amount - 1 downto 0);
+        features    : in  std_logic_vector(threshold_size * feature_address_size - 1 downto 0);
         class       : out std_logic_vector(Bit_lenght(class_amount) downto 0)
     );
 end accelerator;
 
 architecture arch of accelerator is
 
-    -- node_size            = valid_bit + leaf_bit   + feature_size + log2(features_amount)
-signal node_size            : std_logic_vector(1 + 1 + feature_size + Bit_lenght(features_amount));
-signal nodes_amount         : std_logic_vector(2 ** levels_in_memory);
-signal memory_size          : std_logic_vector(node_size * nodes_amount);
-signal nodes_in_parallel    : std_logic_vector(2 ** levels_in_parallel);
+    -- node_size            = valid_bit + leaf_bit   + threshold_size + log2(feature_address_size)
+signal node_size            : natural := (1 + 1 + threshold_size + Bit_lenght(feature_address_size));
+signal nodes_amount         : natural := (2 ** levels_in_memory);
+signal node_address_size    : natural := levels_in_memory;
+signal memory_size          : natural := (node_size * nodes_amount);
+signal nodes_in_parallel    : natural := (2 ** (levels_in_parallel - 1));
 
 component kernel is
-    generic(feature_size        :natural;
+    generic(threshold_size      :natural;
             nodes_in_parallel   :natural);
     port(
-        feature, constants_to_compare : in  std_logic_vector(feature_size * nodes_in_parallel - 1 downto 0);
-        next_nodes                  : out std_logic_vector(levels_in_parallel downto 0));
+        feature, threshold          : in  std_logic_vector(threshold_size * nodes_in_parallel - 1 downto 0);
+        next_nodes                  : out std_logic_vector(levels_in_parallel - 1 downto 0));
 end component;
 
 component address_calculator is
-    generic(levels_in_parallel  :natural := 0;
-            prefetch            :natural := 0;
+    generic(levels_in_parallel  :natural;
+            prefetch            :natural;
             node_address_size   :natural); -- levels_in_memory
     port(
         clk, reset  : in  std_logic;
-        next_nodes  : in  std_logic_vector(levels_in_parallel downto 0);
+        next_nodes  : in  std_logic_vector(levels_in_parallel-1 downto 0);
         node_addresses : out std_logic_vector(node_address_size downto 0));
 end component;
 
@@ -52,9 +53,12 @@ component memory is
             nodes_in_parallel   :natural);
     port(
         clk, write_in : in  std_logic; 
-        node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);
-        node_data_in    : in  std_logic_vector(nodes_in_parallel * node_size - 1 downto 0); 
-        node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)
+        -- node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);
+        -- node_data_in    : in  std_logic_vector(nodes_in_parallel * node_size - 1 downto 0); 
+        -- node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)
+        address0, address1, address2          : in  std_logic_vector(node_address_size-1 downto 0);     
+        data_in0, data_in1, data_in2          : in  std_logic_vector(node_size-1 downto 0);
+        data_out0, data_out1, data_out2       : out std_logic_vector(node_size-1 downto 0)
     ); 
 end component;
 
@@ -65,12 +69,12 @@ component mux2to1 is --TODO: implement muxNto1
         y         : out std_logic_vector(n-1 downto 0));
 end component;
 
-signal kernel_output                    : std_logic_vector(levels_in_parallel downto 0);
-signal mux_ouput, constant_from_memory  : std_logic_vector(feature_size - 1 downto 0);
-signal features_selector                : std_logic_vector(0 downto 0); -- 2 ** levels_in_parallel
+signal kernel_output         : std_logic_vector(levels_in_parallel - 1 downto 0);
+signal mux_ouput, threshold  : std_logic_vector(threshold_size - 1 downto 0);
+signal features_selector     : std_logic_vector(0 downto 0); -- 2 ** (levels_in_parallel -1)
  
 begin
-    AddressCalculator : address_calculator
+    AddressCalculator0 : address_calculator
         generic map(
             levels_in_parallel => levels_in_parallel,
             prefetch => prefetch,
@@ -84,26 +88,26 @@ begin
         );
 
     Mux : mux2to1
-        generic map(feature_size => n)
+        generic map(threshold_size => n)
         port map(
-            features(2 * feature_size - 1 downto feature_size)  => a,
-            features(feature_size - 1 downto 0)                 => b,
-            features_selector                                   => selector,
-            mux_output                                          => y
+            features(2 * threshold_size - 1 downto threshold_size)  => a,
+            features(threshold_size - 1 downto 0)                   => b,
+            features_selector                                       => selector,
+            mux_output                                              => y
         );
     
-    Kernel : kernel
+    Kernel0 : kernel
         generic map(
-            feature_size        => feature_size,
+            threshold_size        => threshold_size,
             nodes_in_parallel   => nodes_in_parallel
         )
         port map(
             mux_output              => feature,
-            constants_from_memory   => constants_to_compare,
+            threshold   => threshold,
             kernel_output           => next_nodes
         );
 
-    Memory : memory
+    Memory0 : memory
         generic map(
             node_address_size   => node_address_size,
             node_size           => node_size,
@@ -112,9 +116,15 @@ begin
         port map(
             clk                     => clk,
             -- write_in             => write_in,
-            address_to_fetch        => node_addresses,
+            address_to_fetch        => address0,
             -- node_data_in         => node_data_in,
-            constants_from_memory   => node_data_out,
-            features_selector       => feature_indexes
+            node_from_memory        => data_out0
         );
+
+    valid_bit <= node_from_memory(node_size - 1);
+    leaf <= node_from_memory(node_size - 2);
+    threshold <= node_from_memory(node_size - 3 downto node_size - threshold_size - 2);
+    features_selector <= node_from_memory(feature_address_size downto 0);
+
+    class <= "1111";
 end arch;

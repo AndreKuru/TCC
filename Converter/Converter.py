@@ -59,10 +59,11 @@ def sort_input_tree(tree: Input_tree) -> tuple[dict, int]:
     
     return input_indexes, max_index, new_indexes
 
-def convert(tree: Input_tree) -> list[Node]:
+def convert(tree: Input_tree) -> tuple[list[Node], int]:
     input_indexes, max_index, new_indexes = sort_input_tree(tree)
 
     new_tree = list()
+    max_feature_index = 0
 
     for new_index in range(2**max_index.bit_length()):
 
@@ -76,12 +77,13 @@ def convert(tree: Input_tree) -> list[Node]:
 
             new_node = Node(VALID_BIT, leaf, tree.threshold[input_index], tree.feature[input_index])
             new_tree.append(new_node)
+            max_feature_index = max(max_feature_index, tree.feature[input_index])
         
         else:
             new_node = Node(INVALID_BIT, 0, 0, 0)
             new_tree.append(new_node)
         
-    return new_tree
+    return new_tree, max_feature_index
 
 def write_tree(output_tree: list[Node], filepath: Path) -> None:
     with filepath.open("w") as file:
