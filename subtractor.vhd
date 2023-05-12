@@ -2,20 +2,23 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity subtractor is
-  generic(size : natural);
-  port(operand0, operand1 : in  std_logic_vector(size - 1 downto 0);
-      cout  : out std_logic;
-      y     : out std_logic_vector(size - 1 downto 0));
+    generic(size : natural);
+    port(
+        operand0, operand1 : in  std_logic_vector(size - 1 downto 0);
+        cout  : out std_logic;
+        y     : out std_logic_vector(size - 1 downto 0)
+    );
 end subtractor;
 
 architecture arch of subtractor is
 component adder is
-  generic(n :natural);
-  port(a, b : in  std_logic_vector(n - 1 downto 0);
-      cin   : in  std_logic;
-      cout  : out std_logic;
-      y     : out std_logic_vector(n - 1 downto 0)
-      );
+    generic(n :natural);
+    port(
+        a, b : in  std_logic_vector(n - 1 downto 0);
+        cin   : in  std_logic;
+        cout  : out std_logic;
+        y     : out std_logic_vector(n - 1 downto 0)
+    );
 end component;
 signal not_operand1  : std_logic_vector(size - 1  downto 0);
 begin

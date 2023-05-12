@@ -3,35 +3,38 @@ use ieee.std_logic_1164.all;
 use work.accelerator_pkg.all;
 
 entity accelerator is
-    generic(threshold_size          :natural;                                                        -- n
-            feature_address_size    :natural;                                                        -- m
-            class_size              :natural;                                                        --  
-            levels_in_memory        :natural;                                                        --  
-            levels_in_parallel      :natural;                                                        -- d
-            prefetch                :natural        
+    generic(
+        threshold_size          :natural;                                                        -- n
+        feature_index_size      :natural;                                                        -- m
+        class_size              :natural;                                                        --  
+        levels_in_memory        :natural;                                                        --  
+        levels_in_parallel      :natural;                                                        -- d
+        prefetch                :natural        
     );
-            -- node_size        = threshold_size + log2(feature_address_size) + leaf_bit + valid_bit -- q
-            -- memory_size = node_size * 2 ** levels_in_memory                                       -- t
-            -- nodes_in_parallel = 2 ** levels_in_parallel                                           -- p
+        -- node_size        = threshold_size + log2(feature_index_size) + leaf_bit + valid_bit   -- q
+        -- memory_size = node_size * 2 ** levels_in_memory                                       -- t
+        -- nodes_in_parallel = 2 ** levels_in_parallel                                           -- p
     port(
         clk         : in  std_logic;
-        features    : in  std_logic_vector(threshold_size * feature_address_size - 1 downto 0);
+        features    : in  std_logic_vector(threshold_size * feature_index_size - 1 downto 0);
         class       : out std_logic_vector(Bit_lenght(class_size) downto 0)
     );
 end accelerator;
 
 architecture arch of accelerator is
 
-    -- node_size            = valid_bit + leaf_bit   + threshold_size + log2(feature_address_size)
-signal node_size            : natural := (1 + 1 + threshold_size + Bit_lenght(feature_address_size));
+    -- node_size            = valid_bit + leaf_bit   + threshold_size + log2(feature_index_size)
+signal node_size            : natural := (1 + 1 + threshold_size + Bit_lenght(feature_index_size));
 signal nodes_amount         : natural := (2 ** levels_in_memory);
 signal node_address_size    : natural := levels_in_memory;
 signal memory_size          : natural := (node_size * nodes_amount);
 signal nodes_in_parallel    : natural := (2 ** (levels_in_parallel - 1));
 
 component kernel is
-    generic(threshold_size      :natural;
-            nodes_in_parallel   :natural);
+    generic(
+        threshold_size      :natural;
+        nodes_in_parallel   :natural
+    );
     port(
         feature, threshold          : in  std_logic_vector(threshold_size * nodes_in_parallel - 1 downto 0);
         next_nodes                  : out std_logic --_vector(nodes_in_parallel - 1 downto 0)
@@ -76,7 +79,7 @@ end component;
 
 signal kernel_output            : std_logic; --_vector(levels_in_parallel - 1 downto 0);
 signal mux_output, threshold    : std_logic_vector(threshold_size - 1 downto 0);
-signal features_selector        : std_logic_vector(feature_address_size - 1 downto 0);
+signal features_selector        : std_logic_vector(feature_index_size - 1 downto 0);
 signal address_to_fetch         : std_logic_vector(node_address_size-1 downto 0);
 signal node_from_memory         : std_logic_vector(node_size-1 downto 0);
 signal valid_bit, leaf          : std_logic;
@@ -97,7 +100,7 @@ begin
 
     Mux : mux_n_to_1
         generic map(
-        element_amount_bit_length  => feature_address_size,
+        element_amount_bit_length  => feature_index_size,
         element_size               => threshold_size
         )
         port map(
@@ -134,7 +137,7 @@ begin
     valid_bit           <= node_from_memory(node_size - 1);
     leaf                <= node_from_memory(node_size - 2);
     threshold           <= node_from_memory(node_size - 3 downto node_size - threshold_size - 2);
-    features_selector   <= node_from_memory(feature_address_size - 1 downto 0);
+    features_selector   <= node_from_memory(feature_index_size - 1 downto 0);
 
     class <= "1111";
 end arch;

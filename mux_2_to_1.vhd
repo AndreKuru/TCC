@@ -2,15 +2,17 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity mux_2_to_1 is
-  generic(n:natural);
-  port(a, b     : in  std_logic_vector(n-1 downto 0);
-      selector  : in  std_logic;
-      y         : out std_logic_vector(n-1 downto 0));
+    generic(n :.natural);
+    port(
+        a, b        : in  std_logic_vector(n-1 downto 0);
+        selector    : in  std_logic;
+        y           : out std_logic_vector(n-1 downto 0)
+    );
 end mux_2_to_1;
 
 architecture arch of mux_2_to_1 is
 begin
-  with selector select
-    y <= a when '1',
-         b when others;
+    with selector select
+        y <= a when '1',
+            b when others;
 end arch;

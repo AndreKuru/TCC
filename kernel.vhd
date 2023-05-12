@@ -8,7 +8,7 @@ entity kernel is
     port(
         feature, threshold          : in  std_logic_vector(threshold_size * nodes_in_parallel - 1 downto 0);
         next_nodes                  : out std_logic --_vector(nodes_in_parallel - 1 downto 0)
-        );
+    );
 end kernel;
 
 architecture arch of kernel is
