@@ -3,8 +3,8 @@ use ieee.std_logic_1164.all;
 
 entity mux_n_to_1 is
     generic(
-        elements_amount     : natural,  -- has to be power of 2 and at least 2
-        elements_size       : natural,
+        elements_amount     : natural;  -- has to be power of 2 and at least 2
+        elements_size       : natural;
         selector_size       : natural   -- has to be log2(elements_amount)
     
     );
@@ -48,9 +48,9 @@ begin
             selector_size   => selector_size - 1
         )
         port map(
-            elements_a  => elements_a(first_half_elements_end downto 0)
-            elements_b  => elements_a(last_half_elements_end downto last_half_elements_start)
-            selector    => selector(selector_size - 2 downto 0)
+            elements_a  => elements_a(first_half_elements_end downto 0),
+            elements_b  => elements_a(last_half_elements_end downto last_half_elements_start),
+            selector    => selector(selector_size - 2 downto 0),
             y           => first_half_mux_output
         );
 
@@ -61,9 +61,9 @@ begin
             selector_size   => selector_size - 1
         )
         port map(
-            elements_a  => elements_a(first_half_elements_end downto 0)
-            elements_b  => elements_a(last_half_elements_end downto last_half_elements_start)
-            selector    => selector(selector_size - 2 downto 0)
+            elements_a  => elements_a(first_half_elements_end downto 0),
+            elements_b  => elements_a(last_half_elements_end downto last_half_elements_start),
+            selector    => selector(selector_size - 2 downto 0),
             y           => last_half_mux_output
         );
 

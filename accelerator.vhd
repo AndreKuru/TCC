@@ -19,7 +19,7 @@ entity accelerator is
         -- memory_size = node_size * 2 ** levels_in_memory                                       -- t
         -- nodes_in_parallel = 2 ** levels_in_parallel                                           -- p
     port(
-        clk         : in  std_logic;
+        clk, reset  : in  std_logic;
         features    : in  std_logic_vector(threshold_size * features_amount - 1 downto 0);
         class       : out std_logic_vector(Bit_lenght(class_size) downto 0)
     );
@@ -70,29 +70,30 @@ component mux_n_to_1 is
         );
 end component;
 
-signal kernel_output            : std_logic; --_vector(levels_in_parallel - 1 downto 0);
+signal kernel_output            : std_logic_vector(levels_in_parallel - 1 downto 0);
 signal mux_output, threshold    : std_logic_vector(threshold_size - 1 downto 0);
 signal features_selector        : std_logic_vector(features_index_size - 1 downto 0);
 signal address_to_fetch         : std_logic_vector(node_address_size-1 downto 0);
 signal node_from_memory         : std_logic_vector(node_size-1 downto 0);
 signal valid_bit, leaf          : std_logic;
  
-signal features_complement      : std_logic_vector(threshold_size * features_amount_remaining - 1 downto 0)
+signal features_complement      : std_logic_vector(threshold_size * features_amount_remaining - 1 downto 0);
 
-first_half_features_end     : natural := threshold_size * (features_amount + features_amount_remaining) / 2 - 1
-last_half_features_start    : natural := threshold_size * (features_amount + features_amount_remaining) / 2
-last_half_features_end      : natural := threshold_size * (features_amount + features_amount_remaining) - 1
+signal first_half_features_end     : natural := threshold_size * (features_amount + features_amount_remaining) / 2 - 1;
+signal last_half_features_start    : natural := threshold_size * (features_amount + features_amount_remaining) / 2;
+signal last_half_features_end      : natural := threshold_size * (features_amount + features_amount_remaining) - 1;
  
 begin
     AddressCalculator0 : address_calculator
         generic map(
-            levels_in_parallel => levels_in_parallel,
-            prefetch => prefetch,
-            node_address_size => node_address_size
+            levels_in_parallel          => levels_in_parallel,
+            prefetch                    => prefetch,
+            addresses_to_fetch_amount   => nodes_in_parallel,
+            node_address_size           => node_address_size
         )
         port map(
             clk             => clk,
-            reset           => '0', -- TODO
+            reset           => reset,
             next_nodes      => kernel_output,
             node_addresses  => address_to_fetch
         );
@@ -107,10 +108,10 @@ begin
             selectors_amount    =>  nodes_in_parallel,
             selectors_size      =>  features_index_size
         
-        );
-        port(
-            elements_a  => total_features(first_half_features_end downto 0)
-            elements_b  => total_features(last_half_features_end downto last_half_features_start)
+        )
+        port map(
+            elements_a  => total_features(first_half_features_end downto 0),
+            elements_b  => total_features(last_half_features_end downto last_half_features_start),
             selectors   => features_selector,
             y           => mux_output
         );
@@ -118,7 +119,7 @@ begin
     Kernel0 : entity work.kernel
         generic map(
             threshold_size      => threshold_size,
-            nodes_in_parallel   => nodes_in_parallel
+            nodes_in_parallel   => nodes_in_parallel,
             levels_in_parallel  => levels_in_parallel
         )
         port map(

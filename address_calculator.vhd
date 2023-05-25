@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.math_real.all -- only power used
+use ieee.math_real.all; -- only power used
 
 entity address_calculator is
     generic(
@@ -28,7 +28,7 @@ signal last_level_addresses_start   : natural := node_address_size * total_addre
 signal last_level_addresses_end     : natural := node_address_size * total_addresses_amount - 1;
 
 signal all_addresses    : std_logic_vector(last_level_addresses_end downto 0);
-signal mux_output       : std_logic_vector(node_address_size - 1 downto 0)
+signal mux_output       : std_logic_vector(node_address_size - 1 downto 0);
 
 begin
     Index_registrator : entity work.registrator
@@ -40,13 +40,15 @@ begin
           q     => index_output
         );
     
-    all_addresses(node_address_size - 1 downto 0) <= index_output
+    all_addresses(node_address_size - 1 downto 0) <= index_output;
 
     Calculators_array : for i in 0 to levels_in_parallel generate
 
-        signal parents_start    : natural := node_address_size * ((2 ** i)       - 1)
-        signal parents_end      : natural := node_address_size * ((2 ** (i + 1)) - 1) - 1
-        signal parents_size     : natural := parents_end - parents_start
+    signal parents_start    : natural := node_address_size * ((2 ** i)       - 1);
+    signal parents_end      : natural := node_address_size * ((2 ** (i + 1)) - 1) - 1;
+    signal parents_size     : natural := parents_end - parents_start;
+
+    begin
 
         N_Children_calculator : entity work.children_calculator
             generic map(
@@ -72,7 +74,6 @@ begin
             y           => mux_output
         );
 
-    node_addresses <= all_addresses -- TODO
-        node_addresses  : out std_logic_vector(node_address_size * addresses_to_fetch_amount - 1 downto 0)
+    node_addresses <= all_addresses(last_level_addresses_start - 1 downto 0);
 
 end arch;

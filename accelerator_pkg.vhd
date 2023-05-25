@@ -1,5 +1,5 @@
 package accelerator_pkg is
-    constant THRESHOLD_SIZE         : natural := 31
+    constant THRESHOLD_SIZE         : natural := 31;
     constant FEATURE_ADDRESS_SIZE   : natural := 4;
     constant CLASS_SIZE             : natural := 3;
     constant LEVELS_IN_MEMORY       : natural := 6;
