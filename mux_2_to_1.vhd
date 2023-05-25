@@ -13,6 +13,6 @@ end mux_2_to_1;
 architecture arch of mux_2_to_1 is
 begin
     with selector select
-        y <= a when '1',
-            b when others;
+        y <= b when '1',
+             a when others;
 end arch;

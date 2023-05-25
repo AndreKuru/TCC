@@ -34,4 +34,4 @@ pyplot.show()
 
 print(max_feature_index)
 print(int(max_feature_index).bit_length())
-export(converted_tree, feature_lenght=pow(2, int(max_feature_index).bit_length()))
+#export(converted_tree, feature_lenght=pow(2, int(max_feature_index).bit_length()))
