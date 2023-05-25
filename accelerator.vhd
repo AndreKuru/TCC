@@ -113,6 +113,7 @@ begin
         generic map(
             threshold_size      => threshold_size,
             nodes_in_parallel   => nodes_in_parallel
+            levels_in_parallel  => levels_in_parallel
         )
         port map(
             feature     => mux_output,

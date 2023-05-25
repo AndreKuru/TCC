@@ -11,20 +11,13 @@ entity subtractor is
 end subtractor;
 
 architecture arch of subtractor is
-component adder is
-    generic(n :natural);
-    port(
-        a, b : in  std_logic_vector(n - 1 downto 0);
-        cin   : in  std_logic;
-        cout  : out std_logic;
-        y     : out std_logic_vector(n - 1 downto 0)
-    );
-end component;
+
 signal not_operand1  : std_logic_vector(size - 1  downto 0);
+
 begin
     not_operand1 <= not operand1;
 
-    Adder0: adder
+    Adder0: entity work.adder
     generic map(n => size)
     port map(
         a           => operand0,

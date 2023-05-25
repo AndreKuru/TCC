@@ -13,19 +13,14 @@ entity adder is
 end adder;
 
 architecture arch of adder is
-component full_adder is
-    port(
-        a, b, cin   : in  std_logic;
-        s, cout     : out std_logic
-    );
-end component;
 
 signal temp  : std_logic_vector(n downto 0);
+
 begin
     temp(0) <= cin;
 
     Full_adder_array : for i in 0 to n - 1 generate
-        Instante_full_adder : full_adder
+        Instante_full_adder : entity work.full_adder
         port map(
             a     => a(i),
             b     => b(i),

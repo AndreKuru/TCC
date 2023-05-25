@@ -11,17 +11,9 @@ entity lesser_comparator is
 end lesser_comparator;
 
 architecture arch of lesser_comparator is
-component subtractor is
-    generic(size : natural);
-    port(
-        operand0, operand1  : in  std_logic_vector(size - 1 downto 0);
-        cout                : out std_logic;
-        y                   : out std_logic_vector(size - 1 downto 0)
-    );
-end component;
 
 begin
-    Subtractor0 : subtractor
+    Subtractor0 : entity work.subtractor
         generic map(size => size)
         port map(
             operand0 => operand0,
