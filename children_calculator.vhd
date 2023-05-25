@@ -14,7 +14,7 @@ end children_calculator;
 
 architecture arch of children_calculator is
 
-    Calculator : for i in 0 to node_addresses_in_amount - 1 generate
+    Calculator_array : for i in 0 to node_addresses_in_amount - 1 generate
     
         Children1 : entity work.adder
             generic map(n => node_addresses_size)
@@ -36,6 +36,6 @@ architecture arch of children_calculator is
                 y       => children2_node(node_addresses_size * (i + 1) - 1 downto node_addresses_size * i)
             );
 
-    end generate Calculator;
+    end generate Calculator_array;
 
 end arch;

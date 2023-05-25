@@ -20,11 +20,11 @@ architecture arch of mux_n_to_1 is
 signal half_elements_amount : natural := elements_amount / 2;
 
 signal middle_element           : natural := half_elements_amount  / 2;
-signal first_half_elements_end  : natural := (element_size * (middle_element)) - 1
-signal last_half_elements_start : natural := (element_size * (middle_element))
-signal last_half_elements_end   : natural := (element_size * (half_elements_amount) - 1)
+signal first_half_elements_end  : natural := (element_size * (middle_element)) - 1;
+signal last_half_elements_start : natural := (element_size * (middle_element));
+signal last_half_elements_end   : natural := (element_size * (half_elements_amount) - 1);
 
-signal first_half_mux_output, last_half_mux_output  : std_logic_vector(elements_size - 1 downto 0)
+signal first_half_mux_output, last_half_mux_output  : std_logic_vector(elements_size - 1 downto 0);
 
 begin
 
