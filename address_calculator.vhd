@@ -1,52 +1,30 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.math_real.all -- only power used
 
 entity address_calculator is
     generic(
-        levels_in_parallel  :natural; -- := 1;
-        prefetch            :natural; -- := 0;
-        node_address_size   :natural  -- levels_in_memory
+        levels_in_parallel  : natural; -- := 1;
+        prefetch            : natural; -- := 0;
+        node_address_size   : natural  -- levels_in_memory
     );
     port(
-        clk, reset  : in  std_logic;
-        next_nodes  : in  std_logic; --_vector(levels_in_parallel - 1 downto 0);
-        node_addresses : out std_logic_vector(node_address_size downto 0)
+        clk, reset      : in  std_logic;
+        next_nodes      : in  std_logic; --_vector(levels_in_parallel - 1 downto 0);
+        node_addresses  : out std_logic_vector(node_address_size downto 0)
     );
 end address_calculator;
 
 architecture arch of address_calculator is
 
-component registrator is
-    generic(n: natural);
-    port(
-        clk, load  : in  std_logic;
-        d           : in  std_logic_vector(n - 1 downto 0);
-        q           : out std_logic_vector(n - 1 downto 0)
-    );
-end component;
+ -- signal levels_to_calculate : natural := levels_in_parallel + prefetch;
 
-component single_address_calculator is
-    generic(node_address_size   :natural); -- levels_in_memory
-    port(
-        clk, next_node_left           : in  std_logic;
-        node_address_in               : in  std_logic_vector(node_address_size downto 0);
-        adder1_output, adder2_output  : out std_logic_vector(node_address_size downto 0)
-    );
-end component;
-
-component mux_2_to_1 is
-    generic(n:natural);
-    port(
-        a, b     : in  std_logic_vector(n - 1 downto 0);
-        selector  : in  std_logic;
-        y         : out std_logic_vector(n - 1 downto 0)
-    );
-end component;
-	
 signal index_output, shifter_output, single_address1_output, single_address2_output, mux_output : std_logic_vector(node_address_size - 1 downto 0);
 
+signal all_addresses : std_logic_vector(node_address_size * ((2 ** levels_in_parallel) - 1) downto 0)
+
 begin
-    Index_registrator : registrator
+    Index_registrator : entity work.registrator
         generic map(n => node_address_size)
         port map(
           clk   => clk,
@@ -54,6 +32,27 @@ begin
           d     => mux_output,
           q     => index_output
         );
+    
+    all_addresses(node_address_size - 1 downto 0) <= index_output
+
+    Calculators : for i in 0 to levels_in_parallel - 1 generate
+
+        signal elements_amount_start    : natural := (2 ** i)       - 1
+        signal elements_amount_end      : natural := (2 ** (i + 1)) - 1
+        signal elements_amount_size     : natural := elements_amount_end - elements_amount_start
+
+        entity work.children_calculator
+            generic map(
+                node_addresses_in_amount    => 2 ** i,
+                node_addresses_size         => node_address_size
+            )
+            port map(
+                parent_node     => all_addresses(node_address_size * elements_amount_end - 1 downto node_address_size * elements_amount_start)
+                children1_node  => --TODO
+                children2_node  =>
+            );
+    end generate Calculators;
+    
 
     Single_address_calculator0 : single_address_calculator
         generic map(node_address_size => node_address_size)

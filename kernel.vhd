@@ -24,8 +24,8 @@ begin
         Comparator : entity work.lesser_comparator
         generic map(size => threshold_size)
         port map(
-            operand0    => feature(threshold * (i + 1) - 1 downto threshold * i),
-            operand1    => threshold(threshold * (i + 1) - 1 downto threshold * i),
+            operand0    => feature(threshold_size * (i + 1) - 1 downto threshold_size * i),
+            operand1    => threshold(threshold_size * (i + 1) - 1 downto threshold_size * i),
             is_lesser   => comparators_output(i)
         );
     end generate Comparator_array;
