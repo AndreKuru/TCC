@@ -30,7 +30,7 @@ begin
         port map(
             elements_a  => elements_a,
             elements_b  => elements_b,
-            selector    => selector(selectors_size * (i + 1) - 1 downto selectors_size * i),
+            selector    => selectors(selectors_size * (i + 1) - 1 downto selectors_size * i),
             y           => y(elements_size * (i + 1) - 1 downto elements_size * i)
         );
     end generate M_mux;

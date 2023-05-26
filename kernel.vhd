@@ -16,7 +16,9 @@ architecture arch of kernel is
 
 signal middle_node          : natural := (nodes_in_parallel - 1) / 2;
 
-signal comparators_output   : std_logic_vector(nodes_in_parallel - 1 downto 0);
+signal comparators_output       : std_logic_vector(nodes_in_parallel - 1 downto 0);
+signal elements_a, elements_b   : std_logic_vector(nodes_in_parallel / 2 - 1 downto 0);
+signal selector                 : std_logic;
 
 begin
     
@@ -30,15 +32,18 @@ begin
         );
     end generate Comparator_array;
 
+    elements_a  <= comparators_output(middle_node - 1 downto 0);
+    elements_b  <= comparators_output(nodes_in_parallel - 1 downto middle_node + 1);
+    selector    <= comparators_output(middle_node);
     Next_nodes_mux : entity work.mux_n_bits_to_1_bit
     generic map(
-        element_amount   => nodes_in_parallel - 1,
+        elements_amount   => nodes_in_parallel - 1,
         selectors_amount => levels_in_parallel
     )
     port map(
-        elements_a          => comparators_output(middle_node - 1 downto 0),
-        elements_b          => comparators_output(nodes_in_parallel - 1 downto middle_node + 1),
-        selector            => comparators_output(middle_node),
+        elements_a          => elements_a,
+        elements_b          => elements_b,
+        selector            => selector,
         selectors_output    => next_nodes
     );
 

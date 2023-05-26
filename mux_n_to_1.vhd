@@ -20,9 +20,9 @@ architecture arch of mux_n_to_1 is
 signal half_elements_amount : natural := elements_amount / 2;
 
 signal middle_element           : natural := half_elements_amount  / 2;
-signal first_half_elements_end  : natural := (element_size * (middle_element)) - 1;
-signal last_half_elements_start : natural := (element_size * (middle_element));
-signal last_half_elements_end   : natural := (element_size * (half_elements_amount) - 1);
+signal first_half_elements_end  : natural := (elements_size * (middle_element)) - 1;
+signal last_half_elements_start : natural := (elements_size * (middle_element));
+signal last_half_elements_end   : natural := (elements_size * (half_elements_amount) - 1);
 
 signal first_half_mux_output, last_half_mux_output  : std_logic_vector(elements_size - 1 downto 0);
 
@@ -34,12 +34,22 @@ begin
         port map(
             a           => elements_a,
             b           => elements_b,
-            selector    => selector,
+            selector    => selector(0),
             y           => y
         );
     end generate Initial_mux;
 
     Following_muxes : if elements_amount > 2 generate
+
+    signal first_elements_a, first_elements_b, last_elements_a, last_elements_b   : std_logic_vector(elements_size * elements_amount - 1 downto 0);
+
+    begin
+    first_elements_a    <= elements_a(first_half_elements_end downto 0);
+    first_elements_b    <= elements_a(last_half_elements_end downto last_half_elements_start);
+    last_elements_a     <= elements_b(first_half_elements_end downto 0);
+    last_elements_b     <= elements_b(last_half_elements_end downto last_half_elements_start);
+
+
 
         First_half_mux : entity work.mux_n_to_1
         generic map(
@@ -48,8 +58,8 @@ begin
             selector_size   => selector_size - 1
         )
         port map(
-            elements_a  => elements_a(first_half_elements_end downto 0),
-            elements_b  => elements_a(last_half_elements_end downto last_half_elements_start),
+            elements_a  => first_elements_a,
+            elements_b  => first_elements_b,
             selector    => selector(selector_size - 2 downto 0),
             y           => first_half_mux_output
         );
@@ -61,8 +71,8 @@ begin
             selector_size   => selector_size - 1
         )
         port map(
-            elements_a  => elements_a(first_half_elements_end downto 0),
-            elements_b  => elements_a(last_half_elements_end downto last_half_elements_start),
+            elements_a  => last_elements_a,
+            elements_b  => last_elements_b,
             selector    => selector(selector_size - 2 downto 0),
             y           => last_half_mux_output
         );

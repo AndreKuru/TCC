@@ -9,25 +9,15 @@ entity memory is
             nodes_in_parallel   :natural := 3);
     port(
         clk, write_in   : in  std_logic; 
-        -- node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);
-        -- node_data_in    : in  std_logic_vector(nodes_in_parallel * node_size - 1 downto 0); 
-        -- node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)
-        address0, address1, address2          : in  std_logic_vector(node_address_size-1 downto 0);     
-        data_in0, data_in1, data_in2          : in  std_logic_vector(node_size-1 downto 0);
-        data_out0, data_out1, data_out2       : out std_logic_vector(node_size-1 downto 0)
+        node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);
+        node_data_in    : in  std_logic_vector(nodes_in_parallel * node_size - 1 downto 0); 
+        node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)
     ); 
-  -- generic (addressSize, dataElementSize : natural);
-  -- port(
-  --   clk, write_in                         : in  std_logic; 
-  --   address0, address1, address2          : in  std_logic_vector(addressSize-1 downto 0);     
-  --   data_in0, data_in1, data_in2          : in  std_logic_vector(dataElementSize-1 downto 0);
-  --   data_out0, data_out1, data_out2       : out std_logic_vector(dataElementSize-1 downto 0)
-  -- ); 
 end memory;
 
 architecture arch of memory is
 
-type ram_array is array (0 to (2**node_address_size)-1) of std_logic_vector (node_size-1 downto 0);
+type ram_array is array (0 to (2 ** node_address_size) - 1) of std_logic_vector (node_size - 1 downto 0);
 
 signal ram_data: ram_array :=(
     b"1000000000000011000000010111100110000000000000000",
@@ -100,17 +90,23 @@ begin
 
     process(clk)
     begin
-        if(rising_edge(clk)) then
-        if(write_in='1') then 
-            ram_data(to_integer(unsigned(address0))) <= data_in0;
-            ram_data(to_integer(unsigned(address1))) <= data_in1;
-            ram_data(to_integer(unsigned(address2))) <= data_in2;
-        end if;
+        if rising_edge(clk) and write_in = '1' then 
+            Data_serialize : for i in 0 to nodes_in_parallel loop
+                ram_data(to_integer(unsigned(node_addresses))) <= node_data_in(
+                                                                    node_size * i 
+                                                                    downto 
+                                                                    node_size * (i + 1) - 1);
+            end loop Data_serialize;
         end if;
     end process;
 
-    data_out0 <= ram_data(to_integer(unsigned(address0)));
-    data_out1 <= ram_data(to_integer(unsigned(address1)));
-    data_out2 <= ram_data(to_integer(unsigned(address2)));
+    Data_fetch : for i in 0 to nodes_in_parallel generate
+
+    signal node_data_start      : natural := node_size * i;
+    signal node_data_end        : natural := node_size * (i + 1) - 1;
+
+    begin
+        node_data_out(node_data_end downto node_data_start) <= ram_data(to_integer(unsigned(node_addresses)));
+    end generate Data_fetch;
 
 end arch;

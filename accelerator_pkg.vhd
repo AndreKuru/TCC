@@ -1,11 +1,12 @@
 package accelerator_pkg is
-    constant THRESHOLD_SIZE         : natural := 31;
-    constant FEATURE_ADDRESS_SIZE   : natural := 4;
-    constant CLASS_SIZE             : natural := 3;
-    constant LEVELS_IN_MEMORY       : natural := 6;
-    constant LEVELS_IN_PARALLEL     : natural := 1;
-    constant PREFETCH               : natural := 0;
-
+    constant THRESHOLD_SIZE             : natural := 31;
+    constant FEATURE_ADDRESS_SIZE       : natural := 4;
+    constant FEATURES_AMOUNT            : natural := 12;
+    constant CLASS_SIZE                 : natural := 3;
+    constant LEVELS_IN_MEMORY           : natural := 6;
+    constant LEVELS_IN_PARALLEL         : natural := 1;
+    constant PREFETCH                   : natural := 0;
+    constant FEATURES_AMOUNT_REMAINING  : natural := 4;
      
     function Bit_lenght (
         x : positive)
