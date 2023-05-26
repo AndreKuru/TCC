@@ -140,3 +140,12 @@ dmypy.json
 # vhdl residues
 *.o
 *.vcd
+
+# quartus residues
+*.qpf
+*.qsf
+*.rpt
+output_files/
+simulation/
+db/
+incremental_db/

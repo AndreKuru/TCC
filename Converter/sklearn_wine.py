@@ -29,9 +29,9 @@ for node in converted_tree:
     i = i + 1
 
 plot_tree(classifier, fontsize=10)
-pyplot.show()
+# pyplot.show()
 
 
 print(max_feature_index)
 print(int(max_feature_index).bit_length())
-#export(converted_tree, feature_lenght=pow(2, int(max_feature_index).bit_length()))
+export(converted_tree, feature_lenght = int(max_feature_index).bit_length())

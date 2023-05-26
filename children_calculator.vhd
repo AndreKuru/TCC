@@ -18,10 +18,11 @@ begin
 
     Calculator_array : for i in 0 to node_addresses_in_amount - 1 generate
 
-    signal parent_shifted : std_logic_vector(node_addresses_in_amount * node_addresses_size - 1 downto 0) 
-    := parents_nodes(node_addresses_size * (i + 1) - 2 downto node_addresses_size * i) & '0';
+    signal parent_shifted : std_logic_vector(node_addresses_in_amount * node_addresses_size - 1 downto 0);
 
     begin
+
+        parent_shifted <= parents_nodes(node_addresses_size * (i + 1) - 2 downto node_addresses_size * i) & '0';
 
         Children1 : entity work.adder
             generic map(n => node_addresses_size)

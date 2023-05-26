@@ -36,6 +36,6 @@ def export(tree : list[Node], filepath : Path = Path.cwd() / "tree1.ktree", thre
                 threshold = ''.rjust(threshold_lenght, '0')
                 feature = ''.rjust(feature_lenght, '0')
 
-            # node_str = ' '.join([valid_bit, leaf, feature, threshold])
-            node_str = valid_bit + leaf + feature + threshold
+            node_str = ' '.join([valid_bit, leaf, feature, threshold])
+            # node_str = valid_bit + leaf + feature + threshold
             file.write(node_str + "\n")

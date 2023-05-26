@@ -17,10 +17,10 @@ end mux_n_unified_to_1;
 
 architecture arch of mux_n_unified_to_1 is
 
-signal middle_element           : natural := elements_amount  / 2;
-signal first_half_elements_end  : natural := (elements_size * (middle_element)) - 1;
-signal last_half_elements_start : natural := (elements_size * (middle_element));
-signal last_half_elements_end   : natural := (elements_size * (elements_amount) - 1);
+constant middle_element           : natural := elements_amount  / 2;
+constant first_half_elements_end  : natural := (elements_size * (middle_element)) - 1;
+constant last_half_elements_start : natural := (elements_size * (middle_element));
+constant last_half_elements_end   : natural := ((elements_size * (elements_amount)) - 1);
 
 signal first_half_elements, last_half_elements   : std_logic_vector(elements_size * (elements_amount / 2) - 1 downto 0);
 

@@ -21,10 +21,10 @@ architecture arch of address_calculator is
  -- signal levels_to_calculate : natural := levels_in_parallel + prefetch;
 
 
-signal last_level_addresses_amount  : natural := 2 ** levels_in_parallel; -- this addresses will not be fetched in this cycle
-signal total_addresses_amount       : natural := addresses_to_fetch_amount + last_level_addresses_amount;
-signal last_level_addresses_start   : natural := node_address_size * total_addresses_amount - (node_address_size * total_addresses_amount);
-signal last_level_addresses_end     : natural := node_address_size * total_addresses_amount - 1;
+constant last_level_addresses_amount  : natural := 2 ** levels_in_parallel; -- this addresses will not be fetched in this cycle
+constant total_addresses_amount       : natural := addresses_to_fetch_amount + last_level_addresses_amount;
+constant last_level_addresses_end     : natural := node_address_size * total_addresses_amount - 1;
+constant last_level_addresses_start   : natural := node_address_size * total_addresses_amount - (node_address_size * last_level_addresses_amount);
 
 signal all_addresses            : std_logic_vector(last_level_addresses_end downto 0);
 signal last_level_addresses     : std_logic_vector(last_level_addresses_end downto last_level_addresses_start);
@@ -42,23 +42,25 @@ begin
     
     all_addresses(node_address_size - 1 downto 0) <= index_output;
 
-    Calculators_array : for i in 0 to levels_in_parallel generate
+    Calculators_array : for i in 0 to levels_in_parallel - 1 generate
 
-    signal parents_start    : natural := node_address_size * ((2 ** i)       - 1);
-    signal parents_end      : natural := node_address_size * ((2 ** (i + 1)) - 1) - 1;
-    signal parents_size     : natural := parents_end - parents_start;
+    constant parents_start    : natural := node_address_size * ((2 ** i)       - 1);
+    constant parents_end      : natural := node_address_size * ((2 ** (i + 1)) - 1) - 1;
+    constant parents_size     : natural := parents_end - parents_start;
 
-    signal childrens1_start  : natural := parents_end + 1;
-    signal childrens1_end    : natural := childrens1_start + parents_size;
-    signal childrens2_start  : natural := childrens1_end + 1;
-    -- signal childrens2_end    : natural := childrens2_start + parents_size;
+    constant childrens1_start  : natural := parents_end + 1;
+    constant childrens1_end    : natural := childrens1_start + parents_size;
+    constant childrens2_start  : natural := childrens1_end + 1;
+    constant childrens2_end    : natural := childrens2_start + parents_size;
 
-    signal parents_nodes_s    : std_logic_vector(parents_size downto 0) := all_addresses(parents_start    + parents_size downto parents_start);
-    signal childrens1_nodes_s : std_logic_vector(parents_size downto 0) := all_addresses(childrens1_start + parents_size downto childrens1_start);
-    signal childrens2_nodes_s : std_logic_vector(parents_size downto 0) := all_addresses(childrens2_start + parents_size downto childrens2_start);
-
+    signal parents_nodes_s, childrens1_nodes_s, childrens2_nodes_s : std_logic_vector(parents_size downto 0);
 
     begin
+
+        parents_nodes_s <= all_addresses(parents_end downto parents_start);
+
+        all_addresses(childrens1_end downto childrens1_start)   <= childrens1_nodes_s;
+        all_addresses(childrens2_end downto childrens2_start)   <= childrens2_nodes_s;
 
         N_Children_calculator : entity work.children_calculator
             generic map(
@@ -76,9 +78,9 @@ begin
     
     Mux_of_last_level : entity work.mux_n_unified_to_1
         generic map(
-            elements_size   => node_address_size,
             elements_amount => last_level_addresses_amount,
-            selector_size   => levels_in_parallel - 1
+            elements_size   => node_address_size,
+            selector_size   => levels_in_parallel
         )
         port map(
             elements    => last_level_addresses,
