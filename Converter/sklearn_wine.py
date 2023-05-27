@@ -18,13 +18,13 @@ tree = Input_tree(
     list(classifier.tree_.value),
 )
 
-converted_tree, max_feature_index = convert(tree)
+converted_tree = convert(tree)
 
 # for i in range(len(tree.children_left)):
 #     print(i, tree.children_left[i], tree.children_right[i], tree.feature[i], tree.feature[i])
 
 i = 0
-for node in converted_tree:
+for node in converted_tree.nodes:
     print(i, end=" ")
     print(node)
     i = i + 1
@@ -33,6 +33,6 @@ plot_tree(classifier, fontsize=10)
 pyplot.show(block=False)
 
 
-print(max_feature_index)
-print(int(max_feature_index).bit_length())
-export(converted_tree, feature_lenght=int(max_feature_index).bit_length())
+print(converted_tree.max_feature_index)
+print(int(converted_tree.max_feature_index).bit_length())
+export(converted_tree)
