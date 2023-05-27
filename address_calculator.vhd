@@ -32,12 +32,13 @@ signal index_output, mux_output : std_logic_vector(node_address_size - 1 downto 
 
 begin
     Index_registrator : entity work.registrator
-        generic map(n => node_address_size)
+        generic map(data_size => node_address_size)
         port map(
-          clk   => clk,
-          load  => reset,
-          d     => mux_output,
-          q     => index_output
+            clk         => clk,
+            reset       => reset,
+            load        => '1',
+            data_in     => mux_output,
+            data_out    => index_output
         );
     
     all_addresses(node_address_size - 1 downto 0) <= index_output;

@@ -7,7 +7,7 @@ entity kernel is
             levels_in_parallel  :natural
     );
     port(
-        feature, threshold          : in  std_logic_vector(threshold_size * nodes_in_parallel - 1 downto 0);
+        features, thresholds          : in  std_logic_vector(threshold_size * nodes_in_parallel - 1 downto 0);
         next_nodes                  : out std_logic_vector(levels_in_parallel - 1 downto 0)
     );
 end kernel;
@@ -24,8 +24,8 @@ begin
         Comparator : entity work.lesser_comparator
         generic map(size => threshold_size)
         port map(
-            operand0    => feature(threshold_size * (i + 1) - 1 downto threshold_size * i),
-            operand1    => threshold(threshold_size * (i + 1) - 1 downto threshold_size * i),
+            operand0    => features(threshold_size * (i + 1) - 1 downto threshold_size * i),
+            operand1    => thresholds(threshold_size * (i + 1) - 1 downto threshold_size * i),
             is_lesser   => comparators_output(i)
         );
     end generate Comparator_array;

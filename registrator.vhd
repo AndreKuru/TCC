@@ -3,20 +3,22 @@ use ieee.std_logic_1164.all;
 -- use ieee.std_logic_unsigned.all;
 
 entity registrator is
-    generic(n : natural);
+    generic(data_size : natural);
     port(
-        clk, load   : in  std_logic;
-        d           : in  std_logic_vector(n-1 downto 0);
-        q           : out std_logic_vector(n-1 downto 0)
+        clk, reset, load    : in  std_logic;
+        data_in             : in  std_logic_vector(data_size - 1 downto 0);
+        data_out            : out std_logic_vector(data_size - 1 downto 0)
     );
   end registrator;
 
 architecture arch of registrator is
 begin
-    process(clk, load)
+    process(clk, load, reset)
     begin
-        if (rising_edge(clk) and load = '1') then
-        q <= d;
+        if reset = '1' then
+            data_out <= (others => '0');
+        elsif rising_edge(clk) and load = '1' then
+            data_out <= data_in;
         end if;
     end process;
 end arch;
