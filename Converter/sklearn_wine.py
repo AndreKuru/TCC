@@ -5,17 +5,17 @@ from exporter import export
 from matplotlib import pyplot
 
 
-X, y = load_wine(return_X_y = True,as_frame = True )
+X, y = load_wine(return_X_y=True, as_frame=True)
 
 classifier = DecisionTreeClassifier()
-classifier.fit(X,y)
+classifier.fit(X, y)
 
 tree = Input_tree(
     list(classifier.tree_.children_left),
     list(classifier.tree_.children_right),
     list(classifier.tree_.feature),
     list(classifier.tree_.threshold),
-    list(classifier.tree_.value)
+    list(classifier.tree_.value),
 )
 
 converted_tree, max_feature_index = convert(tree)
@@ -25,7 +25,7 @@ converted_tree, max_feature_index = convert(tree)
 
 i = 0
 for node in converted_tree:
-    print(i,end=' ')
+    print(i, end=" ")
     print(node)
     i = i + 1
 
@@ -35,4 +35,4 @@ pyplot.show(block=False)
 
 print(max_feature_index)
 print(int(max_feature_index).bit_length())
-export(converted_tree, feature_lenght = int(max_feature_index).bit_length())
+export(converted_tree, feature_lenght=int(max_feature_index).bit_length())
