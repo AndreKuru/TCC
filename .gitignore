@@ -141,7 +141,7 @@ dmypy.json
 *.o
 *.vcd
 
-# quartus residues
+# Quartus
 *.qpf
 *.qsf
 *.rpt
@@ -149,3 +149,6 @@ output_files/
 simulation/
 db/
 incremental_db/
+
+# ModelSim
+*.qws

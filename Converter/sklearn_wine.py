@@ -1,6 +1,6 @@
 from sklearn.datasets import load_wine
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-from Converter import Input_tree, convert
+from converter import Input_tree, convert
 from exporter import export
 from matplotlib import pyplot
 
@@ -14,7 +14,8 @@ tree = Input_tree(
     list(classifier.tree_.children_left),
     list(classifier.tree_.children_right),
     list(classifier.tree_.feature),
-    list(classifier.tree_.threshold)
+    list(classifier.tree_.threshold),
+    list(classifier.tree_.value)
 )
 
 converted_tree, max_feature_index = convert(tree)
@@ -29,7 +30,7 @@ for node in converted_tree:
     i = i + 1
 
 plot_tree(classifier, fontsize=10)
-# pyplot.show()
+pyplot.show(block=False)
 
 
 print(max_feature_index)

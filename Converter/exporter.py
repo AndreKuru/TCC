@@ -1,4 +1,4 @@
-from Converter import Node
+from converter import Node
 from pathlib import Path
 
 def bin_fixed_len(number: int|float, length: int = 31):
@@ -13,10 +13,18 @@ def bin_fixed_len(number: int|float, length: int = 31):
         return binary.rjust(length, '0')
     
 
+def export_configurations(
+        threshold_size : int,
+        features_amount : int, 
+        class_size : int, 
+        nodes_amount : int, 
+        levels_in_parallel : int, 
+        prefetch : int,
+        filepath : Path
+        ) -> None:
+    ...
 
-
-
-def export(tree : list[Node], filepath : Path = Path.cwd() / "tree1.ktree", threshold_lenght: int = 31, feature_lenght: int = 31) -> None:
+def export_memory_block(tree : list[Node], filepath : Path, threshold_lenght : int, feature_lenght: int) -> None:
     with open(filepath, 'w') as file:
         for node in tree:
             if node.valid_bit:
@@ -36,6 +44,10 @@ def export(tree : list[Node], filepath : Path = Path.cwd() / "tree1.ktree", thre
                 threshold = ''.rjust(threshold_lenght, '0')
                 feature = ''.rjust(feature_lenght, '0')
 
-            node_str = ' '.join([valid_bit, leaf, feature, threshold])
-            # node_str = valid_bit + leaf + feature + threshold
+            # node_str = ' '.join([valid_bit, leaf, feature, threshold])
+            node_str = valid_bit + leaf + feature + threshold
             file.write(node_str + "\n")
+
+def export(tree : list[Node], max_feature_index : int, threshold_max_value : int, class_amount, path : Path = Path.cwd(), memory_filename : str = "wine.ktree", configuration_filename : str = "accelerator_pkg.vhd", threshold_lenght: int = 31,) -> None:
+    # export_memory_block(tree, path / memory_filename, threshold_lenght, feature_lenght)
+    ...
