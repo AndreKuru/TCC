@@ -1,17 +1,18 @@
 package accelerator_pkg is
-    constant THRESHOLD_SIZE             : natural := 31;
-    constant FEATURES_AMOUNT            : natural := 12;
+    constant FEATURES_AMOUNT            : natural := 13;
+    constant FEATURES_AMOUNT_REMAINING  : natural := 3;
     constant FEATURE_INDEX_SIZE         : natural := 4;
-    constant CLASS_SIZE                 : natural := 3;
+    constant THRESHOLD_SIZE             : natural := 26;
+    constant CLASS_SIZE                 : natural := 2;
     constant LEVELS_IN_MEMORY           : natural := 6;
     constant LEVELS_IN_PARALLEL         : natural := 1;
     constant PREFETCH                   : natural := 0;
-    constant FEATURES_AMOUNT_REMAINING  : natural := 4;
-     
+ -- constants for the tree serialized in the file: wine.ktree
+
     function Bit_lenght (
         x : positive)
         return natural;
-     
+
 end package accelerator_pkg;
 
 -- Package Body Section
@@ -28,5 +29,5 @@ package body accelerator_pkg is
             i := i + 1;
         return i;
     end function;
- 
+
 end package body accelerator_pkg;

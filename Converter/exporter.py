@@ -2,7 +2,7 @@ from converter import Node, Output_tree
 from pathlib import Path
 
 
-THRESHOLD_SHIFT = 2**16
+THRESHOLD_SHIFT = 2**16  # to simulate float as integer
 
 
 def bin_fixed_len(number: int | float, length: int = 31):
@@ -18,20 +18,62 @@ def bin_fixed_len(number: int | float, length: int = 31):
 
 
 def export_configurations(
-    threshold_size: int,
-    features_amount: int,
-    class_size: int,
-    nodes_amount: int,
-    levels_in_parallel: int,
-    prefetch: int,
     filepath: Path,
+    memory_filename: str,
+    features_amount: int,
+    feature_index_length: int,
+    threshold_length: int,
+    value_length: int,
+    nodes_amount: int,
+    levels_in_parallel: int = 1,
+    prefetch: int = 0,
 ) -> None:
-    ...
 
+    features_amount_remaining = 2**feature_index_length - features_amount
+    levels_in_memory = (nodes_amount - 1).bit_length()
+
+    lines = list()
+    lines.append("package accelerator_pkg is")
+    lines.append("    constant FEATURES_AMOUNT            : natural := " + str(features_amount) + ";")
+    lines.append("    constant FEATURES_AMOUNT_REMAINING  : natural := " + str(features_amount_remaining) + ";")
+    lines.append("    constant FEATURE_INDEX_SIZE         : natural := " + str(feature_index_length) + ";")
+    lines.append("    constant THRESHOLD_SIZE             : natural := " + str(threshold_length) + ";")
+    lines.append("    constant CLASS_SIZE                 : natural := " + str(value_length) + ";")
+    lines.append("    constant LEVELS_IN_MEMORY           : natural := " + str(levels_in_memory) + ";")
+    lines.append("    constant LEVELS_IN_PARALLEL         : natural := " + str(levels_in_parallel) + ";")
+    lines.append("    constant PREFETCH                   : natural := " + str(prefetch) + ";")
+    lines.append(" -- constants for the tree serialized in the file: " + memory_filename)
+    lines.append("")
+    lines.append("    function Bit_lenght (")
+    lines.append("        x : positive)")
+    lines.append("        return natural;")
+    lines.append("")
+    lines.append("end package accelerator_pkg;")
+    lines.append("")
+    lines.append("-- Package Body Section")
+    lines.append("package body accelerator_pkg is")
+    lines.append("    function Bit_lenght (")
+    lines.append("        x : positive) ")
+    lines.append("    return natural is")
+    lines.append("        variable i : natural;")
+    lines.append("    begin")
+    lines.append("        i := 0;  ")
+    lines.append("        while (2**i < x) and i < 63 loop")
+    lines.append("            i := i + 1;")
+    lines.append("        end loop;")
+    lines.append("            i := i + 1;")
+    lines.append("        return i;")
+    lines.append("    end function;")
+    lines.append("")
+    lines.append("end package body accelerator_pkg;")
+
+    with open(filepath, "w") as file:
+        for line in lines:
+            file.write(line + "\n")
 
 def export_memory_block(
-    nodes: list[Node],
     filepath: Path,
+    nodes: list[Node],
     feature_index_length: int,
     threshold_length: int,
     value_length: int,
@@ -65,20 +107,29 @@ def export(
     configuration_filename: str = "accelerator_pkg.vhd",
 ) -> None:
     feature_index_length = tree.max_feature_index.bit_length()
-    threshold_length = int(
-        tree.max_threshold * THRESHOLD_SHIFT
-    ).bit_length()  # THRESHOLD_SHIFT to simulate float as integer
+    threshold_length = int(tree.max_threshold * THRESHOLD_SHIFT).bit_length()
     value_length = tree.max_value.bit_length()
+
+    export_configurations(
+        path / configuration_filename,
+        memory_filename,
+        tree.max_feature_index + 1,
+        feature_index_length,
+        threshold_length,
+        value_length,
+        len(tree.nodes),
+    )
 
     if value_length > (feature_index_length + threshold_length):
         threshold_length = value_length - (feature_index_length + threshold_length)
     else:
-        value_length = (feature_index_length + threshold_length)
+        value_length = feature_index_length + threshold_length
 
     export_memory_block(
-        tree.nodes,
         path / memory_filename,
+        tree.nodes,
         feature_index_length,
         threshold_length,
         value_length,
     )
+
