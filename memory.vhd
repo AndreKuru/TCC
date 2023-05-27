@@ -6,13 +6,14 @@ use ieee.math_real.all;
 entity memory is
     generic (
         node_address_size   : natural;
-        nodes_amount        : natural;
+        -- nodes_amount        : natural;
         node_size           : natural;
         nodes_in_parallel   : natural
         );
     port(
-        clk, write_in   : in  std_logic; 
-        node_data_in    : in  std_logic_vector(nodes_amount * node_size - 1 downto 0); 
+        clk             : in  std_logic; 
+        -- write_in        : in  std_logic; 
+        -- node_data_in    : in  std_logic_vector(nodes_amount * node_size - 1 downto 0); 
         node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);
         node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)
     ); 
@@ -91,14 +92,14 @@ signal ram_data: ram_array :=(
 
 begin
 
-    process(clk, write_in)
-    begin
-        if rising_edge(clk) and write_in = '1' then 
-            Data_serialize : for i in 0 to nodes_amount - 1 loop
-                ram_data(i) <= node_data_in(node_size * (i + 1) - 1 downto node_size * i);
-            end loop Data_serialize;
-        end if;
-    end process;
+    -- process(clk, write_in)
+    -- begin
+    --     if rising_edge(clk) and write_in = '1' then 
+    --         Data_serialize : for i in 0 to nodes_amount - 1 loop
+    --             ram_data(i) <= node_data_in(node_size * (i + 1) - 1 downto node_size * i);
+    --         end loop Data_serialize;
+    --     end if;
+    -- end process;
 
     Data_fetch : for i in 0 to nodes_in_parallel - 1 generate
 

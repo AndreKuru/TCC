@@ -20,7 +20,7 @@ entity accelerator is
     port(
         clk, reset      : in  std_logic;
         features        : in  std_logic_vector(threshold_size * features_amount - 1 downto 0);
-        nodes_data_in   : in  std_logic_vector(nodes_amount * node_size - 1 downto 0);
+        -- nodes_data_in   : in  std_logic_vector(nodes_amount * node_size - 1 downto 0);
         ready           : out std_logic;
         class           : out std_logic_vector(class_size - 1 downto 0)
     );
@@ -76,15 +76,15 @@ begin
     Memory0 : entity work.memory
         generic map(
             node_address_size   => levels_in_memory,
-            nodes_amount        => nodes_amount,
+            -- nodes_amount        => nodes_amount,
             node_size           => node_size,
             nodes_in_parallel   => nodes_in_parallel
         )
         port map(
             clk             => clk,
-            write_in        => '0',
+            -- write_in        => '0',
             node_addresses  => address_to_fetch,
-            node_data_in    => nodes_data_in,
+            -- node_data_in    => nodes_data_in,
             node_data_out   => node_from_memory
         );
 

@@ -23,7 +23,7 @@ architecture tb of accelerator_tb is
 
 signal clk, reset      : std_logic;
 signal features        : std_logic_vector(threshold_size * features_amount - 1 downto 0);
-signal nodes_data_in   : std_logic_vector(nodes_amount * node_size - 1 downto 0);
+-- signal nodes_data_in   : std_logic_vector(nodes_amount * node_size - 1 downto 0);
 signal ready           : std_logic;
 signal class           : std_logic_vector(class_size - 1 downto 0);
 
@@ -45,7 +45,7 @@ begin
             clk             => clk,
             reset           => reset,
             features        => features,
-            nodes_data_in   => nodes_data_in,
+            -- nodes_data_in   => nodes_data_in,
             ready           => ready,
             class           => class
         );
