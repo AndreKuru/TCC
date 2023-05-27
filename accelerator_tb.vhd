@@ -21,7 +21,7 @@ signal clk, reset   : std_logic;
 signal features     : std_logic_vector(threshold_size * features_amount - 1 downto 0); -- inputs
 signal class        : std_logic_vector(Bit_lenght(class_size) downto 0); -- outputs
 
-constant clkp : time := 5 ns
+constant clkp : time := 5 ns;
 
 begin
     UUT: entity work.accelerator 

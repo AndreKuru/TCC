@@ -23,7 +23,10 @@ def export_configurations(
     features_amount: int,
     feature_index_length: int,
     threshold_length: int,
+    threshold_length_complement: int,
     value_length: int,
+    value_length_complement: int,
+    node_length: int,
     nodes_amount: int,
     levels_in_parallel: int = 1,
     prefetch: int = 0,
@@ -38,13 +41,17 @@ def export_configurations(
     lines.append("    constant FEATURES_AMOUNT_REMAINING  : natural := " + str(features_amount_remaining) + ";")
     lines.append("    constant FEATURE_INDEX_SIZE         : natural := " + str(feature_index_length) + ";")
     lines.append("    constant THRESHOLD_SIZE             : natural := " + str(threshold_length) + ";")
+    lines.append("    constant THRESHOLD_SIZE_COMPLEMENT  : natural := " + str(threshold_length_complement) + ";")
     lines.append("    constant CLASS_SIZE                 : natural := " + str(value_length) + ";")
+    lines.append("    constant CLASS_SIZE_COMPLEMENT      : natural := " + str(value_length_complement) + ";")
+    lines.append("    constant NODES_AMOUNT               : natural := " + str(nodes_amount) + ";")
+    lines.append("    constant NODE_SIZE                  : natural := " + str(node_length) + ";")
     lines.append("    constant LEVELS_IN_MEMORY           : natural := " + str(levels_in_memory) + ";")
     lines.append("    constant LEVELS_IN_PARALLEL         : natural := " + str(levels_in_parallel) + ";")
     lines.append("    constant PREFETCH                   : natural := " + str(prefetch) + ";")
     lines.append(" -- constants for the tree serialized in the file: " + memory_filename)
     lines.append("")
-    lines.append("    function Bit_lenght (")
+    lines.append("    function Bit_length (")
     lines.append("        x : positive)")
     lines.append("        return natural;")
     lines.append("")
@@ -52,7 +59,7 @@ def export_configurations(
     lines.append("")
     lines.append("-- Package Body Section")
     lines.append("package body accelerator_pkg is")
-    lines.append("    function Bit_lenght (")
+    lines.append("    function Bit_length (")
     lines.append("        x : positive) ")
     lines.append("    return natural is")
     lines.append("        variable i : natural;")
@@ -110,26 +117,33 @@ def export(
     threshold_length = int(tree.max_threshold * THRESHOLD_SHIFT).bit_length()
     value_length = tree.max_value.bit_length()
 
+    if value_length > (feature_index_length + threshold_length):
+        node_length = value_length + 1 # leaf bit
+        threshold_length_complement = value_length - (feature_index_length + threshold_length)
+        value_length_complement = 0
+    else:
+        node_length = (feature_index_length + threshold_length) + 1 # leaf bit
+        threshold_length_complement = 0
+        value_length_complement = (feature_index_length + threshold_length) - value_length
+
+    export_memory_block(
+        path / memory_filename,
+        tree.nodes,
+        feature_index_length,
+        threshold_length + threshold_length_complement,
+        value_length + value_length_complement,
+    )
+
+
     export_configurations(
         path / configuration_filename,
         memory_filename,
         tree.max_feature_index + 1,
         feature_index_length,
         threshold_length,
+        threshold_length_complement,
         value_length,
+        value_length_complement,
+        node_length,
         len(tree.nodes),
     )
-
-    if value_length > (feature_index_length + threshold_length):
-        threshold_length = value_length - (feature_index_length + threshold_length)
-    else:
-        value_length = feature_index_length + threshold_length
-
-    export_memory_block(
-        path / memory_filename,
-        tree.nodes,
-        feature_index_length,
-        threshold_length,
-        value_length,
-    )
-
