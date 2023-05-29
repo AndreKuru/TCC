@@ -27,7 +27,7 @@ signal features        : std_logic_vector(threshold_size * features_amount - 1 d
 signal ready           : std_logic;
 signal class           : std_logic_vector(class_size - 1 downto 0);
 
-constant clkp : time := 5 ns;
+constant clkp : time := 1 ns;
 
 begin
     UUT: entity work.accelerator 
@@ -53,9 +53,10 @@ begin
     Inialization : process
     begin
         reset <= '1'; 
-        wait for 5 * clkp;
+        wait for 2 * clkp;
         reset <= '0';
-        wait;
+        wait until ready = '1';
+        wait for 2 * clkp;
     end process;
 
     Clk_simulation : process
@@ -64,6 +65,19 @@ begin
         clk <= '1'; wait for clkp/2;
     end process;
 
-    features    <= (0 => '1', others => '0');
+    process
+    begin
+        features    <= (others => '0');
+        wait for 2 * clkp;
+        wait until reset = '1';
+        features    <= (15 => '1', others => '0');
+        wait for 2 * clkp;
+        wait until reset = '1';
+        features    <= (31 => '1', others => '0');
+        wait for 2 * clkp;
+        wait until reset = '1';
+        features    <= (31 => '1', 15 => '1', others => '0');
+        wait;
+    end process;
 
 end tb;
