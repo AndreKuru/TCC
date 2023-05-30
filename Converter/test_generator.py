@@ -1,5 +1,6 @@
 from converter import Node
-from exporter import THRESHOLD_SHIFT
+from constants import THRESHOLD_SHIFT
+
 
 def save_setup(
     value: int,
@@ -16,6 +17,8 @@ def save_setup(
             difference_setup += [feature_setup]
     
     if len(difference_setup) > 0:
+        last_features_setup = features_setup
+
         saved_setups += [difference_setup]
         saved_results += [value]
 
@@ -41,20 +44,21 @@ def visit_feature(
 
     children_left = index_node * 2 + 1   
 
-    if children_left < len(nodes):
+    if children_left < len(nodes) - 1:
         children_right = children_left + 1
 
-        visit_feature(nodes, children_left, feature_setup_left, last_features_setup)
-        visit_feature(nodes, children_right, feature_setup_right, last_features_setup)
+        visit_feature(nodes, children_left, feature_setup_left, last_features_setup, saved_setups, saved_results)
+        visit_feature(nodes, children_right, feature_setup_right, last_features_setup, saved_setups, saved_results)
     else:
         value = nodes[index_node].value
         save_setup(value, features_setup, last_features_setup, saved_setups, saved_results)
 
-def generate_testbench_setup(nodes: list[Node]) -> None:
+def generate_testbench_setup(nodes: list[Node]
+) -> tuple[list[list[tuple[int, int] | None]], list[int]]:
 
     # depth first search initialization
     features_setup = list()
-    last_features_setup = list()
+    last_features_setup = [None]
     saved_results = list()
     saved_setups = list()
 

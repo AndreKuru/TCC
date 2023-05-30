@@ -140,6 +140,7 @@ dmypy.json
 # vhdl residues
 *.o
 *.vcd
+*tb.vhd
 
 # Quartus
 *.qpf

@@ -32,11 +32,9 @@ for node in converted_tree.nodes:
     i = i + 1
 
 plot_tree(classifier, fontsize=10)
-pyplot.show(block=True)
-
 
 print(converted_tree.max_feature_index)
 print(int(converted_tree.max_feature_index).bit_length())
 
-pyplot.show(block=True)
+# pyplot.show(block=False)
 export(converted_tree)

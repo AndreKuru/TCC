@@ -1,12 +1,11 @@
 from converter import Node, Output_tree
-from test_generator import generate_testbench_setup
+from constants import THRESHOLD_SHIFT
+
 from pathlib import Path
+from test_generator import generate_testbench_setup
 
 
-THRESHOLD_SHIFT = 2**16  # to simulate float as integer
-
-
-def bin_fixed_len(number: int | float, length: int = 31):
+def bin_fixed_len(number: int | float, length: int = 31) -> str:
     number = int(number)
 
     if number < 0:
@@ -107,17 +106,135 @@ def export_memory_block(
 
             file.write(node_serialized + "\n")
 
+def initialize_testbench() -> list[str]:
+    lines = list()
+
+    lines.append("library ieee;")
+    lines.append("use ieee.std_logic_1164.all;")
+    lines.append("use work.accelerator_pkg.all;")
+    lines.append("")
+    lines.append("entity accelerator_tb is")
+    lines.append("    generic(")
+    lines.append("        features_amount             : natural := FEATURES_AMOUNT;")
+    lines.append("        features_index_size         : natural := FEATURE_INDEX_SIZE;")
+    lines.append("        features_amount_remaining   : natural := FEATURES_AMOUNT_REMAINING;")
+    lines.append("        threshold_size              : natural := THRESHOLD_SIZE;")
+    lines.append("        threshold_size_complement   : natural := THRESHOLD_SIZE_COMPLEMENT;")
+    lines.append("        class_size                  : natural := CLASS_SIZE;")
+    lines.append("        class_size_complement       : natural := CLASS_SIZE_COMPLEMENT;")
+    lines.append("        nodes_amount                : natural := NODES_AMOUNT;")
+    lines.append("        node_size                   : natural := NODE_SIZE;")
+    lines.append("        levels_in_memory            : natural := LEVELS_IN_MEMORY;")
+    lines.append("        levels_in_parallel          : natural := LEVELS_IN_PARALLEL;")
+    lines.append("        prefetch                    : natural := PREFETCH")
+    lines.append("    );")
+    lines.append("end accelerator_tb;")
+    lines.append("")
+    lines.append("architecture tb of accelerator_tb is")
+    lines.append("")
+    lines.append("signal clk, reset      : std_logic;")
+    lines.append("signal features        : std_logic_vector(threshold_size * features_amount - 1 downto 0);")
+    lines.append("-- signal nodes_data_in   : std_logic_vector(nodes_amount * node_size - 1 downto 0);")
+    lines.append("signal ready           : std_logic;")
+    lines.append("signal class           : std_logic_vector(class_size - 1 downto 0);")
+    lines.append("")
+    lines.append("constant clkp : time := 1 ns;")
+    lines.append("")
+    lines.append("begin")
+    lines.append("    UUT: entity work.accelerator ")
+    lines.append("        generic map(")
+    lines.append("            threshold_size              => threshold_size, ")
+    lines.append("            features_amount             => features_amount,")
+    lines.append("            features_index_size         => features_index_size,")
+    lines.append("            class_size                  => class_size,")
+    lines.append("            levels_in_memory            => levels_in_memory,")
+    lines.append("            levels_in_parallel          => levels_in_parallel,")
+    lines.append("            prefetch                    => prefetch,")
+    lines.append("            features_amount_remaining   => features_amount_remaining")
+    lines.append("        )")
+    lines.append("        port map(")
+    lines.append("            clk             => clk,")
+    lines.append("            reset           => reset,")
+    lines.append("            features        => features,")
+    lines.append("            -- nodes_data_in   => nodes_data_in,")
+    lines.append("            ready           => ready,")
+    lines.append("            class           => class")
+    lines.append("        );")
+    lines.append("")
+    lines.append("    Clk_simulation : process")
+    lines.append("    begin")
+    lines.append("        clk <= '0'; wait for clkp/2;")
+    lines.append("        clk <= '1'; wait for clkp/2;")
+    lines.append("    end process;")
+    lines.append("")
+    lines.append("    All_results_test : process")
+    lines.append("    variable write_line : line;")
+    lines.append("    file write_file     : text;")
+    lines.append("    begin")
+    lines.append("        -- Initialization")
+    lines.append("        features <= (others => '0');")
+
+    return lines
+
+
+def generate_feature_assigment(index: int, threshold: int, threshold_length: int) -> str:
+    feature_content = bin_fixed_len(threshold, threshold_length)
+    return (
+        "            features(threshold_size * ("
+        + str(index)
+        + " + 1) - 1 downto threshold_size * "
+        + str(index)
+        + ') <= "'
+        + feature_content
+        + '";'
+    )
+
+def generate_test_iteration(cont, threshold_length: int, lines: list[str], features_setup: list[tuple[int, int] | None]) -> list[str]:
+    lines.append("")
+    lines.append("        -- Setup " + str(cont))
+    lines.append("        reset <= '1';")
+
+    for feature_index, feature_content in features_setup:
+        feature_assigment = generate_feature_assigment(feature_index, feature_content, threshold_length)
+        lines.append(feature_assigment)
+
+    lines.append("        wait for 2 * clkp;")
+    lines.append("        wait until ready = '0';")
+    lines.append("        reset <= '0'")
+    lines.append("")
+    lines.append("        -- Result " + str(cont))
+    lines.append("        wait until ready = '1';")
+    lines.append("        wait for 2 * clkp;")
+    lines.append("        write(write_line, class)")
+    lines.append("        writeline(write_file, write_line)")
+
 def export_testbench(
-    lastlevel_filepath: Path,
+    expected_output_filepath: Path,
+    testbench_output_filepath: Path,
     testbench_filepath: Path,
     nodes: list[Node],
-    feature_index_length: int,
     threshold_length: int,
-    value_length: int,
 ) -> None:
-    ...
     saved_setups, saved_results = generate_testbench_setup(nodes)
 
+    lines = initialize_testbench()
+
+    lines.append('        file_open(write_file, "' + str(testbench_output_filepath) + '", write_mode);')
+
+    cont = 0
+    for setup in saved_setups:
+        cont += 1
+        generate_test_iteration(cont, threshold_length, lines, setup)
+
+
+    lines.append("    end process;")
+    lines.append("")
+    lines.append("end tb;")
+
+
+    with open(testbench_filepath, "w") as file:
+        for line in lines:
+            file.write(line + "\n")
 
 def export(
     tree: Output_tree,
@@ -161,11 +278,10 @@ def export(
         len(tree.nodes),
     )
 
-    export_memory_block(
-        path / (memory_filename + ".kltree"),
+    export_testbench(
+        path / (memory_filename + "_expected_output.ktreet"),
+        path / (memory_filename + "_testbench_output.ktreet"),
         path / testbench_filename,
         tree.nodes,
-        feature_index_length,
-        threshold_length + threshold_length_complement,
-        value_length + value_length_complement,
+        threshold_length,
     )
