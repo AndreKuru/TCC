@@ -11,7 +11,7 @@ package accelerator_pkg is
     constant LEVELS_IN_MEMORY           : natural := 6;
     constant LEVELS_IN_PARALLEL         : natural := 1;
     constant PREFETCH                   : natural := 0;
- -- constants for the tree serialized in the file: wine.ktree
+ -- constants for the tree serialized in the file: wine
 
     function Bit_length (
         x : positive)

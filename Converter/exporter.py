@@ -1,4 +1,5 @@
 from converter import Node, Output_tree
+from test_generator import generate_testbench_setup
 from pathlib import Path
 
 
@@ -106,12 +107,24 @@ def export_memory_block(
 
             file.write(node_serialized + "\n")
 
+def export_testbench(
+    lastlevel_filepath: Path,
+    testbench_filepath: Path,
+    nodes: list[Node],
+    feature_index_length: int,
+    threshold_length: int,
+    value_length: int,
+) -> None:
+    ...
+    saved_setups, saved_results = generate_testbench_setup(nodes)
+
 
 def export(
     tree: Output_tree,
     path: Path = Path.cwd(),
-    memory_filename: str = "wine.ktree",
+    memory_filename: str = "wine",
     configuration_filename: str = "accelerator_pkg.vhd",
+    testbench_filename: str = "accelerator_tb.vhd",
 ) -> None:
     feature_index_length = tree.max_feature_index.bit_length()
     threshold_length = int(tree.max_threshold * THRESHOLD_SHIFT).bit_length()
@@ -127,7 +140,7 @@ def export(
         value_length_complement = (feature_index_length + threshold_length) - value_length
 
     export_memory_block(
-        path / memory_filename,
+        path / (memory_filename + ".ktree"),
         tree.nodes,
         feature_index_length,
         threshold_length + threshold_length_complement,
@@ -146,4 +159,13 @@ def export(
         value_length_complement,
         node_length,
         len(tree.nodes),
+    )
+
+    export_memory_block(
+        path / (memory_filename + ".kltree"),
+        path / testbench_filename,
+        tree.nodes,
+        feature_index_length,
+        threshold_length + threshold_length_complement,
+        value_length + value_length_complement,
     )
