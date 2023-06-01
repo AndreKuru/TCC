@@ -112,6 +112,8 @@ def initialize_testbench() -> list[str]:
     lines.append("library ieee;")
     lines.append("use ieee.std_logic_1164.all;")
     lines.append("use work.accelerator_pkg.all;")
+    lines.append("use std.textio.all;")
+    lines.append("use ieee.std_logic_textio.all;")
     lines.append("")
     lines.append("entity accelerator_tb is")
     lines.append("    generic(")
@@ -200,13 +202,13 @@ def generate_test_iteration(cont, threshold_length: int, lines: list[str], featu
 
     lines.append("        wait for 2 * clkp;")
     lines.append("        wait until ready = '0';")
-    lines.append("        reset <= '0'")
+    lines.append("        reset <= '0';")
     lines.append("")
     lines.append("        -- Result " + str(cont))
     lines.append("        wait until ready = '1';")
     lines.append("        wait for 2 * clkp;")
-    lines.append("        write(write_line, class)")
-    lines.append("        writeline(write_file, write_line)")
+    lines.append("        write(write_line, class);")
+    lines.append("        writeline(write_file, write_line);")
 
 def export_testbench(
     expected_output_filepath: Path,
@@ -227,6 +229,8 @@ def export_testbench(
         generate_test_iteration(cont, threshold_length, lines, setup)
 
 
+    lines.append("")
+    lines.append("        file_close(write_file);")
     lines.append("    end process;")
     lines.append("")
     lines.append("end tb;")

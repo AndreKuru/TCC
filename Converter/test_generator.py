@@ -8,7 +8,7 @@ def save_setup(
     last_features_setup: list[tuple[int, int] | None],
     saved_setups: list[list[tuple[int, int] | None]],
     saved_results: list[int],
-) -> None:
+) -> list[tuple[int, int] | None]:
 
     difference_setup = list()
 
@@ -21,6 +21,8 @@ def save_setup(
 
         saved_setups += [difference_setup]
         saved_results += [value]
+    
+    return last_features_setup
 
 # depth first search
 def visit_feature(
@@ -30,7 +32,7 @@ def visit_feature(
     last_features_setup: list[tuple[int, int] | None],
     saved_setups: list[list[tuple[int, int] | None]],
     saved_results: list[int],
-) -> None:
+) -> list[tuple[int, int] | None]:
     ...
     if nodes[index_node].leaf:
         feature_setup_left = features_setup + [None]
@@ -47,11 +49,13 @@ def visit_feature(
     if children_left < len(nodes) - 1:
         children_right = children_left + 1
 
-        visit_feature(nodes, children_left, feature_setup_left, last_features_setup, saved_setups, saved_results)
-        visit_feature(nodes, children_right, feature_setup_right, last_features_setup, saved_setups, saved_results)
+        last_features_setup = visit_feature(nodes, children_left, feature_setup_left, last_features_setup, saved_setups, saved_results)
+        last_features_setup = visit_feature(nodes, children_right, feature_setup_right, last_features_setup, saved_setups, saved_results)
     else:
         value = nodes[index_node].value
-        save_setup(value, features_setup, last_features_setup, saved_setups, saved_results)
+        last_features_setup = save_setup(value, features_setup, last_features_setup, saved_setups, saved_results)
+    
+    return last_features_setup
 
 def generate_testbench_setup(nodes: list[Node]
 ) -> tuple[list[list[tuple[int, int] | None]], list[int]]:
