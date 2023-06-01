@@ -21,12 +21,12 @@ signal comparators_output       : std_logic_vector(nodes_in_parallel - 1 downto 
 begin
     
     Comparator_array : for i in 0 to nodes_in_parallel - 1 generate
-        Comparator : entity work.lesser_comparator
+        Comparator : entity work.lesser_or_equal_comparator
         generic map(size => threshold_size)
         port map(
-            operand0    => features(threshold_size * (i + 1) - 1 downto threshold_size * i),
-            operand1    => thresholds(threshold_size * (i + 1) - 1 downto threshold_size * i),
-            is_lesser   => comparators_output(i)
+            operand0            => features(threshold_size * (i + 1) - 1 downto threshold_size * i),
+            operand1            => thresholds(threshold_size * (i + 1) - 1 downto threshold_size * i),
+            is_lesser_or_equal  => comparators_output(i)
         );
     end generate Comparator_array;
 

@@ -182,7 +182,7 @@ def initialize_testbench() -> list[str]:
 def generate_feature_assigment(index: int, threshold: int, threshold_length: int) -> str:
     feature_content = bin_fixed_len(threshold, threshold_length)
     return (
-        "            features(threshold_size * ("
+        "        features(threshold_size * ("
         + str(index)
         + " + 1) - 1 downto threshold_size * "
         + str(index)
@@ -231,6 +231,7 @@ def export_testbench(
 
     lines.append("")
     lines.append("        file_close(write_file);")
+    lines.append("        wait;")
     lines.append("    end process;")
     lines.append("")
     lines.append("end tb;")
