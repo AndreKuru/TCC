@@ -14,9 +14,9 @@ end kernel;
 
 architecture arch of kernel is
 
-signal middle_node          : natural := (nodes_in_parallel - 1) / 2;
+constant middle_node        : natural := (nodes_in_parallel - 1) / 2;
 
-signal comparators_output       : std_logic_vector(nodes_in_parallel - 1 downto 0);
+signal comparators_output   : std_logic_vector(nodes_in_parallel - 1 downto 0);
 
 begin
     

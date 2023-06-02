@@ -105,8 +105,11 @@ begin
     constant node_data_end        : natural := node_size * (i + 1) - 1;
     constant node_data_start      : natural := node_size * i;
 
+    constant node_address_end        : natural := node_address_size * (i + 1) - 1;
+    constant node_address_start      : natural := node_address_size * i;
+
     begin
-        node_data_out(node_data_end downto node_data_start) <= ram_data(to_integer(unsigned(node_addresses)));
+        node_data_out(node_data_end downto node_data_start) <= ram_data(to_integer(unsigned(node_addresses(node_address_end downto node_address_start))));
     end generate Data_fetch;
 
 end arch;

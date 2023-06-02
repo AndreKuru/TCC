@@ -39,10 +39,10 @@ signal leaves                   : std_logic_vector(nodes_in_parallel - 1 downto 
 signal features_selectors       : std_logic_vector(nodes_in_parallel * features_index_size - 1 downto 0);
 signal mux_output, thresholds   : std_logic_vector(nodes_in_parallel * threshold_size - 1 downto 0);
 signal last_level_classes       : std_logic_vector(last_level_nodes_amount * class_size - 1 downto 0);
-signal node_from_memory         : std_logic_vector(node_size-1 downto 0);
+signal node_from_memory         : std_logic_vector(nodes_in_parallel * node_size - 1 downto 0);
 
 -- Address calculator
-signal address_to_fetch         : std_logic_vector(levels_in_memory - 1 downto 0);
+signal address_to_fetch         : std_logic_vector(nodes_in_parallel * levels_in_memory - 1 downto 0);
 
 -- Kernel
 signal kernel_output            : std_logic_vector(levels_in_parallel - 1 downto 0);
