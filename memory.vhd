@@ -24,9 +24,9 @@ architecture arch of memory is
 type ram_array is array (0 to (2**node_address_size) - 1) of std_logic_vector (node_size - 1 downto 0);
 
 signal ram_data: ram_array :=(
+    b"001000000000000000",
     b"011000000000000000",
-    b"001000000000000000",
-    b"001000000000000000",
+    b"011000000000000000",
     b"100000000000000000",
     b"100000000000000001",
     b"100000000000000001",

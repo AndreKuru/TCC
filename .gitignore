@@ -136,6 +136,7 @@ dmypy.json
 
 # my_tree_memory_files
 *.ktree
+*.ktreet
 
 # vhdl residues
 *.o
@@ -153,3 +154,9 @@ incremental_db/
 
 # ModelSim
 *.qws
+transcript
+*.wlf
+work/
+
+# Images
+*.pdf

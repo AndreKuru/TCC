@@ -78,15 +78,95 @@ def export_configurations(
         for line in lines:
             file.write(line + "\n")
 
+def initialize_memory_file() -> list[str]:
+    lines = list()
+
+    lines.append("library ieee;")
+    lines.append("use ieee.std_logic_1164.all;")
+    lines.append("use ieee.numeric_std.all;")
+    lines.append("use ieee.math_real.all;")
+    lines.append("")
+    lines.append("entity memory is")
+    lines.append("    generic (")
+    lines.append("        node_address_size   : natural;")
+    lines.append("        -- nodes_amount        : natural;")
+    lines.append("        node_size           : natural;")
+    lines.append("        nodes_in_parallel   : natural")
+    lines.append("        );")
+    lines.append("    port(")
+    lines.append("        clk             : in  std_logic; ")
+    lines.append("        -- write_in        : in  std_logic; ")
+    lines.append("        -- node_data_in    : in  std_logic_vector(nodes_amount * node_size - 1 downto 0); ")
+    lines.append("        node_addresses  : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);")
+    lines.append("        node_data_out   : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)")
+    lines.append("    ); ")
+    lines.append("end memory;")
+    lines.append("")
+    lines.append("architecture arch of memory is")
+    lines.append("")
+    lines.append("type ram_array is array (0 to (2**node_address_size) - 1) of std_logic_vector (node_size - 1 downto 0);")
+    lines.append("")
+    lines.append("signal ram_data: ram_array :=(")
+
+    return lines
+
+def finalize_memory_file(lines: list[str]) -> list[str]:
+    lines.append(");")
+    lines.append("")
+    lines.append("begin")
+    lines.append("")
+    lines.append("    -- process(clk, write_in)")
+    lines.append("    -- begin")
+    lines.append("    --     if rising_edge(clk) and write_in = '1' then ")
+    lines.append("    --         Data_serialize : for i in 0 to nodes_amount - 1 loop")
+    lines.append("    --             ram_data(i) <= node_data_in(node_size * (i + 1) - 1 downto node_size * i);")
+    lines.append("    --         end loop Data_serialize;")
+    lines.append("    --     end if;")
+    lines.append("    -- end process;")
+    lines.append("")
+    lines.append("    Data_fetch : for i in 0 to nodes_in_parallel - 1 generate")
+    lines.append("")
+    lines.append("    constant node_data_end        : natural := node_size * (i + 1) - 1;")
+    lines.append("    constant node_data_start      : natural := node_size * i;")
+    lines.append("")
+    lines.append("    begin")
+    lines.append("        node_data_out(node_data_end downto node_data_start) <= ram_data(to_integer(unsigned(node_addresses)));")
+    lines.append("    end generate Data_fetch;")
+    lines.append("")
+    lines.append("end arch;")
+
+    return lines
+
+def export_memory_file(
+    memory_vhd_filepath: Path,
+    nodes_serialized: list[str],
+) -> None:
+    lines = initialize_memory_file()
+
+    for node_serialized in nodes_serialized[:-1]:
+        lines.append('    b"' + node_serialized + '",')
+    
+    lines.append('    b"' + nodes_serialized[-1] + '"')
+
+    lines = finalize_memory_file(lines)
+
+    with open(memory_vhd_filepath, "w")  as file:
+        for line in lines:
+            file.write(line + "\n")
+
+    
+
 def export_memory_block(
-    filepath: Path,
+    data_memory_filepath: Path,
+    memory_vhd_filepath: Path,
     nodes: list[Node],
     feature_index_length: int,
     threshold_length: int,
     value_length: int,
 ) -> None:
-    with open(filepath, "w") as file:
+    with open(data_memory_filepath, "w") as file:
         count = -1
+        nodes_serialized = list()
         for node in nodes:
             count += 1
 
@@ -105,6 +185,9 @@ def export_memory_block(
                 node_serialized = leaf + feature + threshold
 
             file.write(node_serialized + "\n")
+            nodes_serialized.append(node_serialized)
+        
+        export_memory_file(memory_vhd_filepath, nodes_serialized)
 
 def initialize_testbench() -> list[str]:
     lines = list()
@@ -201,24 +284,26 @@ def generate_test_iteration(cont, threshold_length: int, lines: list[str], featu
         lines.append(feature_assigment)
 
     lines.append("        wait for 2 * clkp;")
-    lines.append("        wait until ready = '0';")
+    lines.append("        if ready /= '0' then")
+    lines.append("          wait until ready = '0';")
+    lines.append("        end if;")
     lines.append("        reset <= '0';")
     lines.append("")
     lines.append("        -- Result " + str(cont))
-    lines.append("        wait until ready = '1';")
+
+    lines.append("        if ready /= '1' then")
+    lines.append("          wait until ready = '1';")
+    lines.append("        end if;")
     lines.append("        wait for 2 * clkp;")
     lines.append("        write(write_line, class);")
     lines.append("        writeline(write_file, write_line);")
 
-def export_testbench(
-    expected_output_filepath: Path,
+def export_testbench_file(
     testbench_output_filepath: Path,
     testbench_filepath: Path,
-    nodes: list[Node],
     threshold_length: int,
+    saved_setups: list[list[tuple[int, int] | None]],
 ) -> None:
-    saved_setups, saved_results = generate_testbench_setup(nodes)
-
     lines = initialize_testbench()
 
     lines.append('        file_open(write_file, "' + str(testbench_output_filepath) + '", write_mode);')
@@ -240,6 +325,29 @@ def export_testbench(
     with open(testbench_filepath, "w") as file:
         for line in lines:
             file.write(line + "\n")
+
+def export_testbench_expected_output_file(
+    expected_output_filepath: Path,
+    value_length: int,
+    saved_results: list[int],
+) -> None:
+    with open(expected_output_filepath, "w") as file:
+        for saved_result in saved_results:
+            binary_result = bin_fixed_len(saved_result, value_length)
+            file.write(binary_result + "\n")
+
+def export_testbench(
+    expected_output_filepath: Path,
+    testbench_output_filepath: Path,
+    testbench_filepath: Path,
+    nodes: list[Node],
+    threshold_length: int,
+    value_length: int,
+) -> None:
+    saved_setups, saved_results = generate_testbench_setup(nodes)
+
+    export_testbench_file(testbench_output_filepath, testbench_filepath, threshold_length, saved_setups)
+    export_testbench_expected_output_file(expected_output_filepath, value_length, saved_results)
 
 def export(
     tree: Output_tree,
@@ -263,12 +371,12 @@ def export(
 
     export_memory_block(
         path / (memory_filename + ".ktree"),
+        path / "memory.vhd",
         tree.nodes,
         feature_index_length,
         threshold_length + threshold_length_complement,
         value_length + value_length_complement,
     )
-
 
     export_configurations(
         path / configuration_filename,
@@ -289,4 +397,5 @@ def export(
         path / testbench_filename,
         tree.nodes,
         threshold_length,
+        value_length,
     )
