@@ -49,7 +49,7 @@ signal kernel_output            : std_logic_vector(levels_in_parallel - 1 downto
 
 -- Class
 signal result                   : std_logic_vector(class_size - 1 downto 0);
-signal class_found              : std_logic;
+signal class_found, compute     : std_logic;
 
 -- Extended signals
 signal features_complement      : std_logic_vector(threshold_size *                     features_amount_remaining - 1 downto 0);
@@ -66,6 +66,7 @@ begin
         port map(
             clk             => clk,
             reset           => reset,
+            load            => compute,
             next_nodes      => kernel_output,
             node_addresses  => address_to_fetch
         );
@@ -220,5 +221,7 @@ begin
             data_in(0)  => '1',
             data_out(0) => ready
         );
+    
+    compute <= not class_found;
 
 end arch;

@@ -118,7 +118,7 @@ def convert(tree: Input_tree) -> Output_tree:
     max_feature_index = 0
     max_threshold = 0
 
-    limit_of_new_indexes = 2 ** max_input_index.bit_length()
+    limit_of_new_indexes = 2 ** max_input_index.bit_length() - 1
 
     for new_index in range(limit_of_new_indexes):
         if new_index in input_indexes:

@@ -104,7 +104,7 @@ def initialize_memory_file() -> list[str]:
     lines.append("")
     lines.append("architecture arch of memory is")
     lines.append("")
-    lines.append("type ram_array is array (0 to (2**node_address_size) - 1) of std_logic_vector (node_size - 1 downto 0);")
+    lines.append("type ram_array is array (0 to (2**node_address_size) - 2) of std_logic_vector (node_size - 1 downto 0);")
     lines.append("")
     lines.append("signal ram_data: ram_array :=(")
 

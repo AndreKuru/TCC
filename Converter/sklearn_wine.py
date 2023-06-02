@@ -5,9 +5,9 @@ from exporter import export
 from matplotlib import pyplot
 
 
-# X, y = load_wine(return_X_y=True, as_frame=True)
+X, y = load_wine(return_X_y=True, as_frame=True)
 
-X, y = [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 1, 1, 0]
+# X, y = [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 1, 1, 0]
 
 classifier = DecisionTreeClassifier()
 classifier.fit(X, y)

@@ -10,9 +10,9 @@ entity address_calculator is
         node_address_size           : natural  -- levels_in_memory
     );
     port(
-        clk, reset      : in  std_logic;
-        next_nodes      : in  std_logic_vector(levels_in_parallel - 1 downto 0);
-        node_addresses  : out std_logic_vector(node_address_size * addresses_to_fetch_amount - 1 downto 0)
+        clk, reset, load    : in  std_logic;
+        next_nodes          : in  std_logic_vector(levels_in_parallel - 1 downto 0);
+        node_addresses      : out std_logic_vector(node_address_size * addresses_to_fetch_amount - 1 downto 0)
     );
 end address_calculator;
 
@@ -36,7 +36,7 @@ begin
         port map(
             clk         => clk,
             reset       => reset,
-            load        => '1',
+            load        => load,
             data_in     => mux_output,
             data_out    => index_output
         );
