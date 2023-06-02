@@ -4,9 +4,9 @@ use ieee.std_logic_1164.all;
 entity subtractor is
     generic(size : natural);
     port(
-        operand0, operand1 : in  std_logic_vector(size - 1 downto 0);
-        cout  : out std_logic;
-        y     : out std_logic_vector(size - 1 downto 0)
+        operand0, operand1  : in  std_logic_vector(size - 1 downto 0);
+        cout, overflow      : out std_logic;
+        y                   : out std_logic_vector(size - 1 downto 0)
     );
 end subtractor;
 
@@ -24,6 +24,8 @@ begin
         b           => not_operand1,
         cin         => '1',
         cout        => cout,
+        overflow    => overflow,
         y           => y
     );
+
 end arch;

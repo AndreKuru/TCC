@@ -5,10 +5,10 @@ use ieee.std_logic_1164.all;
 entity adder is
     generic(n : natural);
     port(
-        a, b : in  std_logic_vector(n - 1 downto 0);
-        cin   : in  std_logic := '0';
-        cout  : out std_logic;
-        y     : out std_logic_vector(n - 1 downto 0)
+        a, b            : in  std_logic_vector(n - 1 downto 0);
+        cin             : in  std_logic := '0';
+        cout, overflow  : out std_logic;
+        y               : out std_logic_vector(n - 1 downto 0)
     );
 end adder;
 
@@ -31,4 +31,5 @@ begin
     end generate Full_adder_array;
   
     cout <= temp(n);
+    overflow <= temp(n) xor temp(n - 1);
 end arch;
