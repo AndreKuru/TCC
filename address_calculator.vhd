@@ -43,37 +43,34 @@ begin
     
     all_addresses(node_address_size - 1 downto 0) <= index_output;
 
-    Calculators_array : for i in 0 to levels_in_parallel - 1 generate
+    Level_calculators_array : for i in 0 to levels_in_parallel - 1 generate
 
     constant parents_start    : natural := node_address_size * ((2 ** i)       - 1);
     constant parents_end      : natural := node_address_size * ((2 ** (i + 1)) - 1) - 1;
-    constant parents_size     : natural := parents_end - parents_start;
+    constant parents_size     : natural := parents_end - parents_start + 1;
 
-    constant childrens1_start  : natural := parents_end + 1;
-    constant childrens1_end    : natural := childrens1_start + parents_size;
-    constant childrens2_start  : natural := childrens1_end + 1;
-    constant childrens2_end    : natural := childrens2_start + parents_size;
+    constant children_start  : natural := parents_end + 1;
+    constant children_end    : natural := children_start + 2 * parents_size - 1;
 
-    signal parents_nodes_s, childrens1_nodes_s, childrens2_nodes_s : std_logic_vector(parents_size downto 0);
+    signal parents_nodes_s  : std_logic_vector(    parents_size - 1 downto 0);
+    signal children_nodes_s : std_logic_vector(2 * parents_size - 1 downto 0);
 
     begin
 
         parents_nodes_s <= all_addresses(parents_end downto parents_start);
 
-        all_addresses(childrens1_end downto childrens1_start)   <= childrens1_nodes_s;
-        all_addresses(childrens2_end downto childrens2_start)   <= childrens2_nodes_s;
+        all_addresses(children_end downto children_start)   <= children_nodes_s;
 
-        N_Children_calculator : entity work.children_calculator
+        Level_Children_calculator : entity work.children_calculator
             generic map(
                 node_addresses_in_amount    => 2 ** i,
                 node_addresses_size         => node_address_size
             )
             port map(
                 parents_nodes     => parents_nodes_s,
-                childrens1_nodes  => childrens1_nodes_s,
-                childrens2_nodes  => childrens2_nodes_s
+                children_nodes  => children_nodes_s
             );
-    end generate Calculators_array;
+    end generate Level_calculators_array;
 
     last_level_addresses <= all_addresses(last_level_addresses_end downto last_level_addresses_start);
     

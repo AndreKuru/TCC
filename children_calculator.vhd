@@ -7,8 +7,8 @@ entity children_calculator is
         node_addresses_size         : natural    -- levels_in_memory
     );
     port(
-        parents_nodes                       : in  std_logic_vector(node_addresses_in_amount * node_addresses_size - 1 downto 0);
-        childrens1_nodes, childrens2_nodes  : out std_logic_vector(node_addresses_in_amount * node_addresses_size - 1 downto 0)
+        parents_nodes   : in  std_logic_vector(    node_addresses_in_amount * node_addresses_size - 1 downto 0);
+        children_nodes  : out std_logic_vector(2 * node_addresses_in_amount * node_addresses_size - 1 downto 0)
     );
 end children_calculator;
 
@@ -16,7 +16,15 @@ architecture arch of children_calculator is
 
 begin
 
-    Calculator_array : for i in 0 to node_addresses_in_amount - 1 generate
+    Children_calculator_array : for i in 0 to node_addresses_in_amount - 1 generate
+
+    constant child1         : natural := 2 * i;
+    constant child1_start   : natural := node_addresses_size * child1;
+    constant child1_end     : natural := node_addresses_size * (child1 + 1) - 1;
+    constant child2         : natural := 2 * i + 1;
+    constant child2_start   : natural := node_addresses_size * child2;
+    constant child2_end     : natural := node_addresses_size * (child2 + 1) - 1;
+
 
     signal parent_shifted : std_logic_vector(node_addresses_size - 1 downto 0);
 
@@ -24,26 +32,26 @@ begin
 
         parent_shifted <= parents_nodes(node_addresses_size * (i + 1) - 2 downto node_addresses_size * i) & '0';
 
-        Children1 : entity work.adder
+        Child1_adder : entity work.adder
             generic map(n => node_addresses_size)
             port map(
                 a       => parent_shifted,
                 b       => (0 => '1', others => '0'),
                 cin     => '0',
                 cout    => open,
-                y       => childrens1_nodes(node_addresses_size * (i + 1) - 1 downto node_addresses_size * i)
+                y       => children_nodes(child1_end downto child1_start)
             );
     
-        Children2 : entity work.adder
+        Child2_adder : entity work.adder
             generic map(n => node_addresses_size)
             port map(
                 a       => parent_shifted,
                 b       => (1 => '1', others => '0'),
                 cin     => '0',
                 cout    => open,
-                y       => childrens2_nodes(node_addresses_size * (i + 1) - 1 downto node_addresses_size * i)
+                y       => children_nodes(child2_end downto child2_start)
             );
 
-    end generate Calculator_array;
+    end generate Children_calculator_array;
 
 end arch;
