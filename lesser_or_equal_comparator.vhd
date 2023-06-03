@@ -15,7 +15,7 @@ signal subtractor_result    : std_logic_vector(size - 1 downto 0);
 signal is_greater, overflow : std_logic;
 -- signal is_lesser, is_equal  : std_logic;
 begin
-    Subtractor0 : entity work.subtractor
+    Subtractor : entity work.subtractor
         generic map(size => size)
         port map(
             operand0 => operand1,
