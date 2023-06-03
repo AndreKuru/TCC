@@ -36,11 +36,11 @@ constant nodes_in_parallel          : natural := 2**levels_in_parallel - 1;
 constant last_level_nodes_amount    : natural := 2**(levels_in_parallel - 1);
 
 -- Data from node
-signal leaves                   : std_logic_vector(nodes_in_parallel - 1 downto 0);
+signal node_from_memory         : std_logic_vector(nodes_in_parallel * node_size - 1 downto 0);
 signal features_selectors       : std_logic_vector(nodes_in_parallel * features_index_size - 1 downto 0);
 signal mux_output, thresholds   : std_logic_vector(nodes_in_parallel * threshold_size - 1 downto 0);
+signal last_level_leaves        : std_logic_vector(last_level_nodes_amount  - 1 downto 0);
 signal last_level_classes       : std_logic_vector(last_level_nodes_amount * class_size - 1 downto 0);
-signal node_from_memory         : std_logic_vector(nodes_in_parallel * node_size - 1 downto 0);
 
 -- Address calculator
 signal address_to_fetch         : std_logic_vector(nodes_in_parallel * levels_in_memory - 1 downto 0);
@@ -92,8 +92,6 @@ begin
 
 
     Compute_data_extraction : for i in 0 to nodes_in_parallel - 1 generate
-        leaves(i) <= node_from_memory(node_size * (i + 1) - 1);
-
         features_selectors(features_index_size * (i + 1) - 1 downto features_index_size * i) <= 
             node_from_memory(
                 node_size * i + threshold_full_size + features_index_size - 1 
@@ -109,8 +107,12 @@ begin
                 );
     end generate;
 
-    Output_data_extraction : for i in 0 to last_level_nodes_amount - 1 generate
-        last_level_classes(class_size * (i + 1) - 1 downto class_size * i) <=
+    Output_data_extraction : for i in nodes_in_parallel - last_level_nodes_amount to nodes_in_parallel - 1 generate
+    constant i_shifted : natural := i - (nodes_in_parallel - last_level_nodes_amount);
+    begin
+        last_level_leaves(i_shifted) <= node_from_memory(node_size * (i + 1) - 1);
+
+        last_level_classes(class_size * (i_shifted + 1) - 1 downto class_size * i_shifted) <=
             node_from_memory(
                 node_size * i + class_size - 1                       
                 downto 
@@ -139,15 +141,15 @@ begin
             levels_in_parallel  => levels_in_parallel
         )
         port map(
-            features     => mux_output,
-            thresholds   => thresholds,
+            features    => mux_output,
+            thresholds  => thresholds,
             next_nodes  => kernel_output
         );
 
-    Multilevel_classes : if levels_in_parallel > 1 generate
-    signal class_selector   : std_logic_vector(levels_in_parallel - 2 downto 0);
+    Multilevel_in_parallel : if levels_in_parallel > 1 generate
+    signal last_level_selector   : std_logic_vector(levels_in_parallel - 2 downto 0);
     begin
-        class_selector <= kernel_output(levels_in_parallel - 2 downto 0);
+        last_level_selector <= kernel_output(levels_in_parallel - 2 downto 0);
 
         Class_Mux : entity work.mux_n_unified_to_1
             generic map(
@@ -157,50 +159,27 @@ begin
             )
             port map(
                 elements    => last_level_classes,
-                selector    => class_selector,
+                selector    => last_level_selector,
                 y           => result
             );
-    end generate Multilevel_classes;
 
-    Multilevel_leaf : if levels_in_parallel > 1 generate
-    signal leaf_bits_acumulated : std_logic_vector(levels_in_parallel downto 0);
-    signal past_nodes_leaf_bit  : std_logic_vector(levels_in_parallel - 1 downto 0);
-    signal leaf_selector        : std_logic_vector(levels_in_parallel - 2 downto 0);
-    begin
-        past_nodes_leaf_bit(0) <= leaves(0);
-        leaf_selector <= kernel_output(levels_in_parallel - 2 downto 0);
-
-        Leaves_array : for i in 1 to levels_in_parallel - 1 generate
-            Leaf_mux : entity work.mux_n_unified_to_1
+        Leaf_mux : entity work.mux_n_unified_to_1
             generic map(
-                elements_amount     => 2**i,
+                elements_amount     => last_level_nodes_amount,
                 elements_size       => 1,
-                selector_size       => i
+                selector_size       => levels_in_parallel - 1
             )
             port map(
-                elements    => leaves(2**(i + 1) - 2 downto 2**i - 1),
-                selector    => leaf_selector(i - 1 downto 0),
-                y(0)        => past_nodes_leaf_bit(i)
+                elements    => last_level_leaves,
+                selector    => last_level_selector,
+                y(0)        => class_found
             );
-        end generate Leaves_array;
 
-        leaf_bits_acumulated(0) <= past_nodes_leaf_bit(0);
-
-        Leaves_acumulator : for i in 1 to levels_in_parallel - 1 generate
-            Leaf_or : entity work.or_bit
-                port map(
-                    a   => leaf_bits_acumulated(i - 1),
-                    b   => leaf_bits_acumulated(i),
-                    y   => leaf_bits_acumulated(i + 1)
-                );
-        end generate;
-
-        class_found <= leaf_bits_acumulated(levels_in_parallel);
-    end generate Multilevel_leaf;
+    end generate Multilevel_in_parallel;
 
     Singlelevel : if levels_in_parallel <= 1 generate
-        result <= last_level_classes;
-        class_found <= leaves(0);
+        result      <= last_level_classes;
+        class_found <= last_level_leaves(0);
     end generate;
 
     Result_registrator : entity work.registrator
