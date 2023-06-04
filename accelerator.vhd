@@ -149,7 +149,7 @@ begin
     Multilevel_in_parallel : if levels_in_parallel > 1 generate
     signal last_level_selector   : std_logic_vector(levels_in_parallel - 2 downto 0);
     begin
-        last_level_selector <= kernel_output(levels_in_parallel - 2 downto 0);
+        last_level_selector <= kernel_output(levels_in_parallel - 1 downto 1);
 
         Class_Mux : entity work.mux_n_unified_to_1
             generic map(

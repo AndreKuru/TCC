@@ -26,7 +26,7 @@ begin
     constant child2_end     : natural := node_addresses_size * (child2 + 1) - 1;
 
 
-    signal parent_shifted : std_logic_vector(node_addresses_size - 1 downto 0);
+    signal parent_shifted, child1_node, child2_node : std_logic_vector(node_addresses_size - 1 downto 0);
 
     begin
 
@@ -39,9 +39,9 @@ begin
                 b       => (0 => '1', others => '0'),
                 cin     => '0',
                 cout    => open,
-                y       => children_nodes(child1_end downto child1_start)
+                y       => child1_node
             );
-    
+        children_nodes(child1_end downto child1_start) <= child1_node; -- better for debug
         Child2_adder : entity work.adder
             generic map(n => node_addresses_size)
             port map(
@@ -49,9 +49,9 @@ begin
                 b       => (1 => '1', others => '0'),
                 cin     => '0',
                 cout    => open,
-                y       => children_nodes(child2_end downto child2_start)
+                y       => child2_node
             );
-
+        children_nodes(child2_end downto child2_start) <= child2_node; -- better for debug
     end generate Children_calculator_array;
 
 end arch;

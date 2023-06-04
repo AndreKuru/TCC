@@ -9,7 +9,7 @@ package accelerator_pkg is
     constant NODES_AMOUNT               : natural := 63;
     constant NODE_SIZE                  : natural := 31;
     constant LEVELS_IN_MEMORY           : natural := 6;
-    constant LEVELS_IN_PARALLEL         : natural := 2;
+    constant LEVELS_IN_PARALLEL         : natural := 3;
     constant PREFETCH                   : natural := 0;
  -- constants for the tree serialized in the file: wine
 

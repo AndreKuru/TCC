@@ -27,7 +27,7 @@ begin
                 y(0)        => answer_selected
             );
 
-    answers_selected <= answer_selected & previous_answers;
+    answers_selected <= previous_answers & answer_selected;
     end generate Initials_level_to_compute;
 
     Several_levels_to_compute : if level_to_compute > 1 generate
@@ -62,7 +62,7 @@ begin
                 y(0)        => answer_selected
             );
 
-    answers_selected <= answer_selected & previous_answers_selected;
+    answers_selected <= previous_answers_selected & answer_selected;
     end generate Several_levels_to_compute;
 
 
