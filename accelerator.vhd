@@ -181,7 +181,7 @@ begin
         class_found <= last_level_leaves(0);
     end generate;
 
-    Result_register : entity work.register
+    Result_register : entity work.register_with_load_and_reset
         generic map(data_size => class_size)
         port map(
             clk         => clk,
@@ -191,7 +191,7 @@ begin
             data_out    => class
         );
 
-    Ready_register : entity work.register
+    Ready_register : entity work.register_with_load_and_reset
         generic map(data_size => 1)
         port map(
             clk         => clk,

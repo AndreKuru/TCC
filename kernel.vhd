@@ -42,7 +42,7 @@ begin
         previous_answers    <= comparators_output(last_level_answers_start - 1 downto 0);
 
         Top_answers_mux : entity work.answers_mux
-        generic map(level_to_compute    => levels_in_parallel - 1)
+        generic map(level_to_compute    => levels_in_parallel)
         port map(
             previous_answers    => previous_answers,
             answers_to_select   => last_level_answers,

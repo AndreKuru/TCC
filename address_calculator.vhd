@@ -28,20 +28,20 @@ constant last_level_addresses_start   : natural := node_address_size * total_add
 
 signal all_addresses            : std_logic_vector(last_level_addresses_end downto 0);
 signal last_level_addresses     : std_logic_vector(last_level_addresses_end downto last_level_addresses_start);
-signal index_output, mux_output : std_logic_vector(node_address_size - 1 downto 0);
+signal register_output, mux_output : std_logic_vector(node_address_size - 1 downto 0);
 
 begin
-    Index_register : entity work.register
+    Address_register : entity work.register_with_load_and_reset
         generic map(data_size => node_address_size)
         port map(
             clk         => clk,
             reset       => reset,
             load        => load,
             data_in     => mux_output,
-            data_out    => index_output
+            data_out    => register_output
         );
     
-    all_addresses(node_address_size - 1 downto 0) <= index_output;
+    all_addresses(node_address_size - 1 downto 0) <= register_output;
 
     Level_calculators_array : for i in 0 to levels_in_parallel - 1 generate
 

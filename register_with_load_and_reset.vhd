@@ -2,16 +2,16 @@ library ieee;
 use ieee.std_logic_1164.all;
 -- use ieee.std_logic_unsigned.all;
 
-entity register is
+entity register_with_load_and_reset is
     generic(data_size : natural);
     port(
         clk, reset, load    : in  std_logic;
         data_in             : in  std_logic_vector(data_size - 1 downto 0);
         data_out            : out std_logic_vector(data_size - 1 downto 0)
     );
-  end register;
+  end register_with_load_and_reset;
 
-architecture arch of register is
+architecture arch of register_with_load_and_reset is
 begin
     process(clk, load, reset)
     begin
