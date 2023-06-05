@@ -31,7 +31,7 @@ signal last_level_addresses     : std_logic_vector(last_level_addresses_end down
 signal index_output, mux_output : std_logic_vector(node_address_size - 1 downto 0);
 
 begin
-    Index_registrator : entity work.registrator
+    Index_register : entity work.register
         generic map(data_size => node_address_size)
         port map(
             clk         => clk,

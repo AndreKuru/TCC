@@ -31,7 +31,6 @@ architecture arch of accelerator is
 
 constant class_full_size            : natural := class_size + class_size_complement;
 constant threshold_full_size        : natural := threshold_size + threshold_size_complement;
-constant memory_size                : natural := node_size * nodes_amount;
 constant nodes_in_parallel          : natural := 2**levels_in_parallel - 1;
 constant last_level_nodes_amount    : natural := 2**(levels_in_parallel - 1);
 
@@ -182,7 +181,7 @@ begin
         class_found <= last_level_leaves(0);
     end generate;
 
-    Result_registrator : entity work.registrator
+    Result_register : entity work.register
         generic map(data_size => class_size)
         port map(
             clk         => clk,
@@ -192,7 +191,7 @@ begin
             data_out    => class
         );
 
-    Ready_registrator : entity work.registrator
+    Ready_register : entity work.register
         generic map(data_size => 1)
         port map(
             clk         => clk,
