@@ -16,14 +16,16 @@ entity accelerator is
         node_size                   : natural := NODE_SIZE;
         levels_in_memory            : natural := LEVELS_IN_MEMORY;
         levels_in_parallel          : natural := LEVELS_IN_PARALLEL;
-        prefetch                    : natural := PREFETCH
+        prefetch                    : natural := PREFETCH;
+        nodes_to_write              : natural := NODES_TO_WRITE
     );
     port(
-        clk, reset      : in  std_logic;
-        features        : in  std_logic_vector(threshold_size * features_amount - 1 downto 0);
-        -- nodes_data_in   : in  std_logic_vector(nodes_amount * node_size - 1 downto 0);
-        ready           : out std_logic;
-        class           : out std_logic_vector(class_size - 1 downto 0)
+        clk, reset, write_in    : in  std_logic;
+        features                : in  std_logic_vector(threshold_size * features_amount - 1 downto 0);
+        data_to_write           : in  std_logic_vector(node_size * nodes_to_write - 1 downto 0);
+        addresses_to_write      : in  std_logic_vector(levels_in_memory - 1 downto 0);
+        ready                   : out std_logic;
+        class                   : out std_logic_vector(class_size - 1 downto 0)
     );
 end accelerator;
 
@@ -77,16 +79,17 @@ begin
     Memory0 : entity work.memory
         generic map(
             node_address_size   => levels_in_memory,
-            -- nodes_amount        => nodes_amount,
             node_size           => node_size,
+            nodes_to_write      => nodes_to_write,
             nodes_in_parallel   => nodes_in_parallel
         )
         port map(
-            clk             => clk,
-            -- write_in        => '0',
-            node_addresses  => address_to_fetch,
-            -- node_data_in    => nodes_data_in,
-            node_data_out   => node_from_memory
+            clk                     => clk,
+            write_in                => write_in,
+            node_data_write         => data_to_write,
+            node_addresses_write    => addresses_to_write,
+            node_addresses_read     => address_to_fetch,
+            node_data_read          => node_from_memory
         );
 
 

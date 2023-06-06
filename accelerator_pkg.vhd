@@ -11,6 +11,7 @@ package accelerator_pkg is
     constant LEVELS_IN_MEMORY           : natural := 6;         -- m = p * i
     constant LEVELS_IN_PARALLEL         : natural := 6;         -- p
     constant PREFETCH                   : natural := 0;
+    constant NODES_TO_WRITE             : natural := 2;
  -- constants for the tree serialized in the file: wine
 
 end package accelerator_pkg;
