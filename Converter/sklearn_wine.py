@@ -22,7 +22,7 @@ labels, data, target = read_csv(folderpath / (filename + file_extension))
 X = data
 y = target
 
-classifier = DecisionTreeClassifier(max_depth=12)
+classifier = DecisionTreeClassifier(max_depth=11)
 classifier.fit(X, y)
 
 tree = Input_tree(

@@ -11,29 +11,22 @@ entity lesser_or_equal_comparator is
 end lesser_or_equal_comparator;
 
 architecture arch of lesser_or_equal_comparator is
-signal subtractor_result    : std_logic_vector(size - 1 downto 0);
-signal is_greater, overflow : std_logic;
--- signal is_lesser, is_equal  : std_logic;
+signal subtractor_result, operand0_extended, operand1_extended  : std_logic_vector(size downto 0);
+signal is_greater, overflow                                     : std_logic;
 begin
+    operand0_extended <= '0' & operand0;
+    operand1_extended <= '0' & operand1;
+
     Subtractor : entity work.subtractor
-        generic map(size => size)
+        generic map(size => size + 1)
         port map(
-            operand0 => operand1,
-            operand1 => operand0,
+            operand0 => operand1_extended,
+            operand1 => operand0_extended,
             y        => subtractor_result,
             overflow => overflow
         );
     
-    is_greater <= subtractor_result(size - 1);
+    is_greater <= subtractor_result(size); --operando0 is greater than operand1
     is_lesser_or_equal <= is_greater xor overflow;
     
---    Equal : entity work.is_zero
---        generic map(size => size)
---        port map(
---            number  => subtractor_result,
---            is_zero => is_equal
---        );
---    
---    is_lesser_or_equal <=   '1' when is_lesser = '1' or is_equal = '1' else
---                            '0';
 end arch;
