@@ -1,18 +1,18 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity kernel is
+entity path_finder is
     generic(threshold_size      :natural;
             nodes_in_parallel   :natural;
             levels_in_parallel  :natural
     );
     port(
         features, thresholds          : in  std_logic_vector(threshold_size * nodes_in_parallel - 1 downto 0);
-        next_nodes                  : out std_logic_vector(levels_in_parallel - 1 downto 0)
+        path_found                  : out std_logic_vector(levels_in_parallel - 1 downto 0)
     );
-end kernel;
+end path_finder;
 
-architecture arch of kernel is
+architecture arch of path_finder is
 
 constant middle_node        : natural := (nodes_in_parallel - 1) / 2;
 
@@ -46,12 +46,12 @@ begin
         port map(
             previous_answers    => previous_answers,
             answers_to_select   => last_level_answers,
-            answers_selected    => next_nodes
+            answers_selected    => path_found
         );
     end generate Multiple_comparators;
 
     Single_comparator: if levels_in_parallel = 1 generate
-        next_nodes <= comparators_output;
+        path_found <= comparators_output;
     end generate Single_comparator;
 
 end arch;

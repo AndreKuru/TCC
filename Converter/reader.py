@@ -32,10 +32,10 @@ def read_csv(filepath: Path, target_indexes: set[int] | None = None) -> tuple[li
                     element = float(element)
                     value_type = float
                 except ValueError:
-                    element = 0
                     value_type = str
                     mapping_table = [element]
                     mapping_tables[index] = mapping_table
+                    element = 0
             
             elements_types.append(value_type)
 

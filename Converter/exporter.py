@@ -67,7 +67,7 @@ def initialize_memory_file() -> list[str]:
     lines.append("use ieee.numeric_std.all;")
     lines.append("use ieee.math_real.all;")
     lines.append("")
-    lines.append("entity memory is")
+    lines.append("entity register_bank is")
     lines.append("    generic (")
     lines.append("        node_address_size   : natural;")
     lines.append("        node_size           : natural;")
@@ -81,9 +81,9 @@ def initialize_memory_file() -> list[str]:
     lines.append("        node_addresses_read     : in  std_logic_vector(nodes_in_parallel * node_address_size - 1 downto 0);")
     lines.append("        node_data_read          : out std_logic_vector(nodes_in_parallel * node_size - 1 downto 0)")
     lines.append("    ); ")
-    lines.append("end memory;")
+    lines.append("end register_bank;")
     lines.append("")
-    lines.append("architecture arch of memory is")
+    lines.append("architecture arch of register_bank is")
     lines.append("")
     lines.append("type ram_array is array (0 to (2**node_address_size) - 2) of std_logic_vector (node_size - 1 downto 0);")
     lines.append("")
@@ -123,7 +123,7 @@ def finalize_memory_file(lines: list[str]) -> list[str]:
     return lines
 
 def export_memory_file(
-    memory_vhd_filepath: Path,
+    register_bank_vhd_filepath: Path,
     nodes_serialized: list[str],
 ) -> None:
     lines = initialize_memory_file()
@@ -135,7 +135,7 @@ def export_memory_file(
 
     lines = finalize_memory_file(lines)
 
-    with open(memory_vhd_filepath, "w")  as file:
+    with open(register_bank_vhd_filepath, "w")  as file:
         for line in lines:
             file.write(line + "\n")
 
@@ -143,7 +143,7 @@ def export_memory_file(
 
 def export_memory_block(
     data_memory_filepath: Path,
-    memory_vhd_filepath: Path,
+    register_bank_vhd_filepath: Path,
     nodes: list[Node],
     feature_index_length: int,
     threshold_length: int,
@@ -172,7 +172,7 @@ def export_memory_block(
             file.write(node_serialized + "\n")
             nodes_serialized.append(node_serialized)
         
-        export_memory_file(memory_vhd_filepath, nodes_serialized)
+        export_memory_file(register_bank_vhd_filepath, nodes_serialized)
 
 def initialize_testbench() -> list[str]:
     lines = list()
@@ -351,7 +351,7 @@ def export(
 
     export_memory_block(
         path / (memory_filename + ".ktree"),
-        path / "memory.vhd",
+        path / "register_bank.vhd",
         tree.nodes,
         feature_index_length,
         threshold_length + threshold_length_complement,

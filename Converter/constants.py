@@ -1,1 +1,1 @@
-THRESHOLD_SHIFT = 2**8  # to simulate float as integer
+THRESHOLD_SHIFT = 2**10  # to simulate float as integer

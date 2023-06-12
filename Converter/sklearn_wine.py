@@ -10,6 +10,7 @@ from pathlib import Path
 # X, y = [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 1, 1, 0]
 # X, y = load_iris(return_X_y=True, as_frame=True)
 # X, y = load_wine(return_X_y=True, as_frame=True)
+# filename = 'wine'
 # X, y = load_diabetes(return_X_y=True, as_frame=True)
 # X, y = load_breast_cancer(return_X_y=True, as_frame=True)
 # X, y = load_digits(return_X_y=True, as_frame=True)
@@ -21,7 +22,7 @@ labels, data, target = read_csv(folderpath / (filename + file_extension))
 X = data
 y = target
 
-classifier = DecisionTreeClassifier()
+classifier = DecisionTreeClassifier(max_depth=12)
 classifier.fit(X, y)
 
 tree = Input_tree(

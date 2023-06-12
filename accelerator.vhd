@@ -46,8 +46,8 @@ signal last_level_classes       : std_logic_vector(last_level_nodes_amount * cla
 -- Address calculator
 signal address_to_fetch         : std_logic_vector(nodes_in_parallel * levels_in_memory - 1 downto 0);
 
--- Kernel
-signal kernel_output            : std_logic_vector(levels_in_parallel - 1 downto 0);
+-- Pathfinder
+signal path_found               : std_logic_vector(levels_in_parallel - 1 downto 0);
 
 -- Class
 signal result                   : std_logic_vector(class_size - 1 downto 0);
@@ -69,14 +69,15 @@ begin
             clk             => clk,
             reset           => reset,
             load            => compute,
-            next_nodes      => kernel_output,
+            path_found      => path_found,
             node_addresses  => address_to_fetch
         );
 
     features_complement <= (others => '0');
     total_features <= features_complement & features;
 
-    Memory0 : entity work.memory
+    
+    Register_bank_unit : entity work.register_bank
         generic map(
             node_address_size   => levels_in_memory,
             node_size           => node_size,
@@ -122,7 +123,7 @@ begin
                 );
     end generate;
 
-    N_to_m_mux : entity work.mux_n_unified_to_m
+    Features_mux : entity work.mux_n_unified_to_m
         generic map(
             elements_amount     =>  features_amount + features_amount_remaining, -- has to be power of 2 and at least 2
             elements_size       =>  threshold_size,
@@ -136,7 +137,7 @@ begin
             y           => mux_output
         );
     
-    Kernel0 : entity work.kernel
+    Path_finder_unit : entity work.path_finder
         generic map(
             threshold_size      => threshold_size,
             nodes_in_parallel   => nodes_in_parallel,
@@ -145,13 +146,13 @@ begin
         port map(
             features    => mux_output,
             thresholds  => thresholds,
-            next_nodes  => kernel_output
+            path_found  => path_found
         );
 
     Multilevel_in_parallel : if levels_in_parallel > 1 generate
     signal last_level_selector   : std_logic_vector(levels_in_parallel - 2 downto 0);
     begin
-        last_level_selector <= kernel_output(levels_in_parallel - 1 downto 1);
+        last_level_selector <= path_found(levels_in_parallel - 1 downto 1);
 
         Class_Mux : entity work.mux_n_unified_to_1
             generic map(
