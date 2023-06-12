@@ -145,6 +145,7 @@ dmypy.json
 
 # Quartus
 *.qpf
+*.qdf
 *.qsf
 *.rpt
 output_files/

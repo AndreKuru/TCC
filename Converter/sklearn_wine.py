@@ -1,16 +1,25 @@
 from sklearn.datasets import load_iris, load_wine, load_digits, load_breast_cancer, load_diabetes
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from converter import Input_tree, convert
+from reader import read_csv
 from exporter import export
 from matplotlib import pyplot
+from pathlib import Path
 
 
 # X, y = [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 1, 1, 0]
 # X, y = load_iris(return_X_y=True, as_frame=True)
-X, y = load_wine(return_X_y=True, as_frame=True)
+# X, y = load_wine(return_X_y=True, as_frame=True)
 # X, y = load_diabetes(return_X_y=True, as_frame=True)
 # X, y = load_breast_cancer(return_X_y=True, as_frame=True)
 # X, y = load_digits(return_X_y=True, as_frame=True)
+
+folderpath = Path.cwd()
+filename = "principais-imputados"
+file_extension = ".csv"
+labels, data, target = read_csv(folderpath / (filename + file_extension))
+X = data
+y = target
 
 classifier = DecisionTreeClassifier()
 classifier.fit(X, y)
@@ -41,5 +50,5 @@ plot_tree(classifier)
 
 
 pyplot.show(block=False)
-pyplot.savefig('wine.pdf')
-export(converted_tree)
+pyplot.savefig((filename + '.pdf'))
+export(converted_tree, memory_filename=filename)
