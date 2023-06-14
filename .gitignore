@@ -137,6 +137,7 @@ dmypy.json
 # my_tree_memory_files
 *.ktree
 *.ktreet
+*.ktreeb
 
 # vhdl residues
 *.o

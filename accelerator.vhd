@@ -23,7 +23,7 @@ entity accelerator is
         clk, reset, write_in    : in  std_logic;
         features                : in  std_logic_vector(threshold_size * features_amount - 1 downto 0);
         data_to_write           : in  std_logic_vector(node_size * nodes_to_write - 1 downto 0);
-        addresses_to_write      : in  std_logic_vector(levels_in_memory - 1 downto 0);
+        base_address_to_write   : in  std_logic_vector(levels_in_memory - 1 downto 0);
         ready                   : out std_logic;
         class                   : out std_logic_vector(class_size - 1 downto 0)
     );
@@ -88,7 +88,7 @@ begin
             clk                     => clk,
             write_in                => write_in,
             node_data_write         => data_to_write,
-            node_addresses_write    => addresses_to_write,
+            base_address_to_write   => base_address_to_write,
             node_addresses_read     => address_to_fetch,
             node_data_read          => node_from_memory
         );

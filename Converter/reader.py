@@ -57,11 +57,16 @@ def read_csv(filepath: Path, target_indexes: set[int] | None = None) -> tuple[li
                 element = line_splitted[i]
 
                 if elements_types[i] == str:
-                    mapping_table : list[str] = mapping_tables[i]
-                    if element not in mapping_table:
-                        mapping_table.append(element)
-                    
-                    element = mapping_table.index(element)
+                    if element == '':
+                        element = None
+                        break
+                    else:
+                        mapping_table : list[str] = mapping_tables[i]
+
+                        if element not in mapping_table:
+                            mapping_table.append(element)
+                        
+                        element = mapping_table.index(element)
                 else:
                     element = elements_types[i](element)
 
@@ -70,8 +75,9 @@ def read_csv(filepath: Path, target_indexes: set[int] | None = None) -> tuple[li
                 else:
                     datum.append(element)
             
-            data.append(datum)
-            targets.append(target)
+            if element is not None:
+                data.append(datum)
+                targets.append(target)
         
     return labels, data, targets
 

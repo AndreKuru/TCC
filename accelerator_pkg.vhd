@@ -4,8 +4,8 @@ package accelerator_pkg is
     constant FEATURE_INDEX_SIZE         : natural := 4;
     constant THRESHOLD_SIZE             : natural := 16;
     constant THRESHOLD_SIZE_COMPLEMENT  : natural := 0;
-    constant CLASS_SIZE                 : natural := 2;
-    constant CLASS_SIZE_COMPLEMENT      : natural := 18;
+    constant CLASS_SIZE                 : natural := 1;
+    constant CLASS_SIZE_COMPLEMENT      : natural := 19;
     constant NODES_AMOUNT               : natural := 4095;
     constant NODE_SIZE                  : natural := 21;
     constant LEVELS_IN_MEMORY           : natural := 12;
